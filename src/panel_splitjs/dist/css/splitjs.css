@@ -1,0 +1,239 @@
+.split {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  overflow: clip; /* Clip overflow to prevent scrollbars; inner content will have their own */
+}
+
+.split.horizontal {
+  flex-direction: row;
+}
+
+.split.vertical {
+  flex-direction: column;
+}
+
+/* Style for initial load to prevent FOUC */
+.split.loading {
+  visibility: hidden;
+}
+
+/* Max width for comfortable reading */
+.left-panel-content {
+  max-width: clamp(450px, 95vw, 1200px);
+  margin: 0px auto;
+}
+
+/* Split panel styles */
+.split > div {
+  position: relative;
+}
+
+.split > div:nth-child(2) {
+  overflow: visible;
+  position: relative;
+  width: 100%;
+}
+
+/* Content wrapper styles */
+.content-wrapper {
+  width: 100%;
+  height: 100%;
+  display: contents;
+  box-sizing: border-box;
+  padding-inline: 0.5rem;
+}
+
+/* Toggle button basic styles */
+.toggle-button-left, .toggle-button-right, .toggle-button-up, .toggle-button-down {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100; /* High z-index to ensure always on top */
+  opacity: 0.5;
+  transition: opacity 0.2s;
+  border-radius: 4px;
+  padding: 2px;
+}
+
+/* Left button (<) - positioned on left side of divider */
+.toggle-button-left {
+  left: -34px; /* 24px width + 10px spacing from divider */
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Right button (>) - positioned on right side of divider */
+.toggle-button-right {
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Up button (^) - positioned above divider */
+.toggle-button-up {
+  top: -34px; /* 24px height + 10px spacing from divider */
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Down button (v) - positioned below divider */
+.toggle-button-down {
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Ensure buttons stay visible even when panels are collapsed */
+.split > div:first-child {
+  min-width: 0 !important; /* Override any minimum width */
+}
+
+.split > div:nth-child(2) {
+  overflow: visible !important; /* Ensure buttons remain visible */
+  position: relative !important;
+}
+
+/* Collapsed state */
+.collapsed-content {
+  display: none;
+}
+
+/* Gutter styles */
+.gutter {
+  background-color: var(--panel-background-color);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transition: background-color 0.2s;
+}
+
+.gutter:hover {
+  background-color: var(--panel-surface-color);
+}
+
+.gutter.gutter-horizontal {
+  cursor: col-resize;
+  position: relative;
+  width: 10px;
+  z-index: 1;
+}
+
+.gutter.gutter-horizontal {
+  cursor: row-resize;
+}
+
+.gutter::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  -webkit-mask-image: url("handle.svg");
+  mask-image: url("handle.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  background-color: var(--panel-border-color);
+}
+
+.gutter.gutter-horizontal::after {
+  width: 10px;
+  height: 24px;
+}
+
+.gutter.gutter-vertical::after {
+  width: 24px;
+  height: 10px;
+  -webkit-mask-image: url("handle_vertical.svg");
+  mask-image: url("handle_vertical.svg");
+}
+
+.split > div:nth-child(2) > div:not(.toggle-button-left):not(.toggle-button-right):not(.toggle-button-up):not(.toggle-button-down) {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  padding-top: 36px; /* Space for the toggle buttons */
+}
+
+/* Toggle button base styles */
+.toggle-button-left,
+.toggle-button-right,
+.toggle-button-up,
+.toggle-button-down {
+  width: 24px;
+  height: 24px;
+  background-color: var(--panel-on-background-color);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: 16px;
+  mask-size: 16px;
+  opacity: 0.5;
+}
+
+.toggle-button-left:hover, .toggle-button-right:hover, .toggle-button-up:hover, .toggle-button-down:hover {
+  opacity: 1;
+}
+
+/* Left arrow button */
+.toggle-button-left {
+  -webkit-mask-image: url("arrow_left.svg");
+  mask-image: url("arrow_left.svg");
+}
+
+/* Right arrow button */
+.toggle-button-right {
+  -webkit-mask-image: url("arrow_right.svg");
+  mask-image: url("arrow_right.svg");
+}
+
+/* Up arrow button */
+.toggle-button-up {
+  -webkit-mask-image: url("arrow_up.svg");
+  mask-image: url("arrow_up.svg");
+}
+
+/* Down arrow button */
+.toggle-button-down {
+  -webkit-mask-image: url("arrow_down.svg");
+  mask-image: url("arrow_down.svg");
+}
+
+/* Animation for toggle icon */
+@keyframes jumpLeftRight {
+  0%, 100% { transform: translateY(-50%); }
+  25% { transform: translate(-4px, -50%); }
+  50% { transform: translateY(-50%); }
+  75% { transform: translate(4px, -50%); }
+}
+
+@keyframes jumpUpDown {
+  0%, 100% { transform: translateX(-50%); }
+  25% { transform: translate(-50%, -4px); }
+  50% { transform: translateX(-50%); }
+  75% { transform: translate(-50%, 4px); }
+}
+
+.toggle-button-left.animated, .toggle-button-right.animated {
+  animation-name: jumpLeftRight;
+  animation-duration: 0.5s;
+  animation-timing-function: ease;
+  animation-iteration-count: 3;
+}
+
+.toggle-button-up.animated, .toggle-button-down.animated {
+  animation-name: jumpUpDown;
+  animation-duration: 0.5s;
+  animation-timing-function: ease;
+  animation-iteration-count: 3;
+}
+
+/* List navigation styles */
+ul.nav.flex-column {
+  padding-inline-start: 0;
+  margin: 0;
+}

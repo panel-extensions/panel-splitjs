@@ -1,0 +1,12 @@
+# This file is managed by Copier; DO NOT EDIT OR REMOVE.
+_commit: '3248832'
+_src_path: ../copier-template-python-open-source/
+add_autobump_workflow: true
+author_email: philipp.jfr@gmail.com
+author_name: Philipp Rudiger
+docs_url: https://panel-extensions.github.io/panel-splitjs/
+github_url: https://github.com/panel-extensions/panel-splitjs
+github_user: philippjfr
+minimal_python_version: py310
+project_short_description: Provides split.js components for Panel.
+project_slug: panel-splitjs

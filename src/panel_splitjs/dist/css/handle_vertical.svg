@@ -1,0 +1,23 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="10"
+  viewBox="0 0 24 10"
+  fill="currentColor"
+  aria-hidden="true"
+>
+  <rect x="2"  y="2.5" width="2" height="2" />
+  <rect x="5"  y="2.5" width="2" height="2" />
+  <rect x="8"  y="2.5" width="2" height="2" />
+  <rect x="11" y="2.5" width="2" height="2" />
+  <rect x="14" y="2.5" width="2" height="2" />
+  <rect x="17" y="2.5" width="2" height="2" />
+  <rect x="20" y="2.5" width="2" height="2" />
+  <rect x="2"  y="5.5" width="2" height="2" />
+  <rect x="5"  y="5.5" width="2" height="2" />
+  <rect x="8"  y="5.5" width="2" height="2" />
+  <rect x="11" y="5.5" width="2" height="2" />
+  <rect x="14" y="5.5" width="2" height="2" />
+  <rect x="17" y="5.5" width="2" height="2" />
+  <rect x="20" y="5.5" width="2" height="2" />
+</svg>
