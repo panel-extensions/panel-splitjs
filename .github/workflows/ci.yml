@@ -31,9 +31,9 @@ jobs:
       fail-fast: false
       matrix:
         environment:
-          - py310
-          - py311
-          - py312
+          - test-310
+          - test-311
+          - test-312
         os:
           - ubuntu-latest
           - macos-latest
