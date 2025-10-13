@@ -1,13 +1,10 @@
 from pathlib import Path
-from typing import Any
 
 import param
-
 from bokeh.embed.bundle import extension_dirs
 from panel.custom import Children, JSComponent
-from panel.layout.base import ListLike
 from panel.layout import Spacer
-
+from panel.layout.base import ListLike
 
 BASE_PATH = Path(__file__).parent
 DIST_PATH = BASE_PATH / 'dist'

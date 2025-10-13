@@ -18,7 +18,7 @@ repos:
     rev: v0.7.0
     hooks:
       - id: ruff
-        files: src/panel_material_ui
+        files: src/panel_splitjs
   - repo: https://github.com/codespell-project/codespell
     rev: v2.3.0
     hooks:
