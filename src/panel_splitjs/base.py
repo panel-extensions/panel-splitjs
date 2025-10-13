@@ -16,6 +16,8 @@ class SplitChildren(Children):
     """A Children parameter that only allows at most two items."""
 
     def _transform_value(self, val):
+        if not hasattr(self, 'owner'):
+            return None
         if val is param.parameterized.Undefined:
             return [Spacer(), Spacer()]
         if any(v is None for v in val):
@@ -29,7 +31,7 @@ class SplitChildren(Children):
 
     def _validate(self, val):
         super()._validate(val)
-        if len(val) <= 2:
+        if val is None or len(val) <= 2:
             return
         if self.owner is None:
             objtype = ""
