@@ -1,12 +1,10 @@
 from pathlib import Path
-from typing import Any
 
 import param
-
 from bokeh.embed.bundle import extension_dirs
 from panel.custom import Children, JSComponent
+from panel.layout import Spacer
 from panel.layout.base import ListLike
-
 
 BASE_PATH = Path(__file__).parent
 DIST_PATH = BASE_PATH / 'dist'
@@ -17,15 +15,29 @@ extension_dirs['panel-splitjs'] = DIST_PATH
 class SplitChildren(Children):
     """A Children parameter that only allows at most two items."""
 
+    def _transform_value(self, val):
+        if val is param.parameterized.Undefined:
+            return [Spacer(), Spacer()]
+        if any(v is None for v in val):
+            val[:] = [Spacer() if v is None else v for v in val]
+        if len(val) == 1:
+            val.append(Spacer())
+        if len(val) == 0:
+            val.extend([Spacer(), Spacer()])
+        val = super()._transform_value(val)
+        return val
+
     def _validate(self, val):
         super()._validate(val)
-        if len(val) > 2:
-            raise ValueError("Split component must have at most two children.")
-        elif len(val) == 1:
-            val.append(val[0])
-        elif len(val) == 0:
-            val = [None, None]
-        return val
+        if len(val) <= 2:
+            return
+        if self.owner is None:
+            objtype = ""
+        elif isinstance(self.owner, param.Parameterized):
+            objtype = self.owner.__class__.__name__
+        else:
+            objtype = self.owner.__name__
+        raise ValueError(f"{objtype} component must have at most two children.")
 
 
 class Split(JSComponent, ListLike):

@@ -378,6 +378,12 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+# Dist assets and _version.py
+src/panel_splitjs/_version.py
+src/panel_splitjs/dist/*.js
+src/panel_splitjs/dist/css/*.css
+src/panel_splitjs/dist/css/*.svg
+
 # End of https://www.toptal.com/developers/gitignore/api/linux,macos,direnv,python,windows,pycharm+all,visualstudiocode,vim
 
 .pixi
