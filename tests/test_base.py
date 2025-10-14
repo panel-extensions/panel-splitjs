@@ -4,13 +4,16 @@ from panel.layout import Spacer
 from panel_splitjs import HSplit, Split, VSplit
 
 
-def test_split_objects_length():
+def test_split_objects():
     split = Split('A', 'B')
 
     assert len(split.objects) == 2
     s1, s2 = split
     assert s1.object == 'A'
     assert s2.object == 'B'
+
+    root = split.get_root()
+    assert len(root.data.objects) == 2
 
 
 def test_split_objects_too_many():
@@ -26,11 +29,13 @@ def test_split_objects_one():
     assert s1.object == 'A'
     assert isinstance(s2, Spacer)
 
+    root = split.get_root()
+    assert len(root.data.objects) == 2
+
 
 def test_split_objects_none():
     split = Split()
+    assert split.objects is None
 
-    assert len(split.objects) == 2
-    s1, s2 = split
-    assert isinstance(s1, Spacer)
-    assert isinstance(s2, Spacer)
+    root = split.get_root()
+    assert root.data.objects is None
