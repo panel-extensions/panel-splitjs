@@ -13,10 +13,11 @@ export function render({ model, view }) {
   const contentWrapper = document.createElement("div")
   contentWrapper.classList.add("content-wrapper")
 
+  let leftArrowButton, rightArrowButton
   if (model.show_buttons) {
     // Create toggle icons for both sides of the divider
-    const leftArrowButton = document.createElement("div")  // < button
-    const rightArrowButton = document.createElement("div") // > button
+    leftArrowButton = document.createElement("div")  // < button
+    rightArrowButton = document.createElement("div") // > button
 
     // Set button icons based on orientation
     if (model.orientation === "horizontal") {
@@ -54,7 +55,7 @@ export function render({ model, view }) {
       model.send_msg({ collapsed: newCollapsedState })
       model.collapsed = newCollapsedState
 
-      updateUIForCollapsedState(newCollapsedState, newSizes)
+      updateUIForCollapsedState(newSizes)
       view.invalidate_layout()
     })
 
@@ -81,7 +82,7 @@ export function render({ model, view }) {
       model.send_msg({ collapsed: newCollapsedState })
       model.collapsed = newCollapsedState
 
-      updateUIForCollapsedState(newCollapsedState, newSizes)
+      updateUIForCollapsedState(newSizes)
       view.invalidate_layout()
     })
   }
@@ -105,9 +106,15 @@ export function render({ model, view }) {
     minSize: [0, 0], // Allow full collapse for both panels
     gutterSize: 8, // Match the 8px width in CSS
     direction: model.orientation,
+    onDrag: (sizes) => {
+      const leftPanelHidden = sizes ? sizes[0] <= 5 : false
+      const rightPanelHidden = sizes ? sizes[1] <= 5 : false
+      if (Math.min(...sizes) < 5) {
+        updateUIForCollapsedState(sizes)
+        view.invalidate_layout()
+      }
+    },
     onDragEnd: (sizes) => {
-      view.invalidate_layout()
-
       // Determine the new collapsed state based on panel sizes
       const rightPanelCollapsed = sizes[1] <= 5
       const leftPanelCollapsed = sizes[0] <= 5
@@ -122,7 +129,9 @@ export function render({ model, view }) {
       }
 
       // Update UI based on current sizes
-      updateUIForCollapsedState(newCollapsedState, sizes)
+      updateUIForCollapsedState(sizes, true)
+
+      view.invalidate_layout()
 
       // Reset click counts when user drags the splitter
       resetClickCounts()
@@ -130,22 +139,28 @@ export function render({ model, view }) {
   })
 
   // Function to update UI elements based on collapsed state
-  function updateUIForCollapsedState(isCollapsed, sizes = null) {
+  function updateUIForCollapsedState(sizes = null, resize = false) {
     // Determine current panel state
     const leftPanelHidden = sizes ? sizes[0] <= 5 : false
     const rightPanelHidden = sizes ? sizes[1] <= 5 : false
 
     // Update content visibility
+    let [ls, rs] = sizes
     if (rightPanelHidden) {
-      contentWrapper.className = "collapsed-content"
+      contentWrapper.className = "collapsed-content";
+      [ls, rs] = [100, 0]
     } else {
       contentWrapper.className = "content-wrapper"
     }
 
     if (leftPanelHidden) {
-      leftContentWrapper.className = "collapsed-content"
+      leftContentWrapper.className = "collapsed-content";
+      [ls, rs] = [0, 100]
     } else {
       leftContentWrapper.className = "content-wrapper"
+    }
+    if (resize) {
+      splitInstance.setSizes([ls, rs])
     }
   }
 
@@ -165,7 +180,7 @@ export function render({ model, view }) {
         splitInstance.setSizes(model.expanded_sizes)
       }
 
-      updateUIForCollapsedState(newCollapsedState)
+      updateUIForCollapsedState()
       view.invalidate_layout()
     }
   })
