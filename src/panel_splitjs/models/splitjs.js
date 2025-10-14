@@ -220,10 +220,12 @@ export function render({ model, view }) {
   leftContentWrapper.classList.add("left-panel-content")
 
   // Append children to the appropriate containers
-  const [left, right] = model.get_child("objects")
-  leftContentWrapper.append(left)
+  if (model.objects != null) {
+    const [left, right] = model.get_child("objects")
+    leftContentWrapper.append(left)
+    contentWrapper.append(right)
+  }
   split0.append(leftContentWrapper)
-  contentWrapper.append(right)
   split1.append(contentWrapper)
 
   return splitDiv
