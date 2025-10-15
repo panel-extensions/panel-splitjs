@@ -2,7 +2,7 @@ import Split from "https://esm.sh/split.js@1.6.5"
 
 const COLLAPSED_SIZE = 5
 
-export function render({ model, view, el }) {
+export function render({ model, el }) {
   const split_div = document.createElement("div")
   split_div.className = `split single-split ${model.orientation}`
   split_div.classList.add("loading")
@@ -82,6 +82,7 @@ export function render({ model, view, el }) {
   el.append(split_div)
 
   let is_collapsed = model.collapsed
+  let sizes = model.sizes
   const init_sizes = is_collapsed ? [100, 0] : model.sizes
   const split_instance = Split([split0, split1], {
     sizes: init_sizes,
@@ -127,11 +128,20 @@ export function render({ model, view, el }) {
     }
     if (resize) {
       split_instance.setSizes([ls, rs])
+      sizes = [ls, rs]
       model.sizes = [ls, rs]
     }
   }
 
-  model.on("collapsed", (event) => {
+  model.on("sizes", () => {
+    if (sizes === model.sizes) {
+      return
+    }
+    sizes = model.sizes
+    sync_ui(sizes, true)
+  })
+
+  model.on("collapsed", () => {
     if (is_collapsed === model.collapsed) {
       return
     }
@@ -151,7 +161,7 @@ export function render({ model, view, el }) {
       left_arrow_button.classList.add("animated")
       right_arrow_button.classList.add("animated")
 
-      // Remove animation after it completes and set flag
+      // Remove animation after it completes
       setTimeout(() => {
         left_arrow_button.classList.remove("animated")
         right_arrow_button.classList.remove("animated")
@@ -159,4 +169,6 @@ export function render({ model, view, el }) {
     }
     split_div.classList.remove("loading")
   })
+
+  model.on("remove", () => split_instance.destroy())
 }

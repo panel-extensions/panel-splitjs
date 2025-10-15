@@ -58,11 +58,6 @@ class SplitBase(JSComponent, ListLike):
 
     __abstract = True
 
-    def __init__(self, *objects, **params):
-        if objects:
-            params["objects"] = list(objects)
-        super().__init__(**params)
-
     def _process_property_change(self, props):
         props = super()._process_property_change(props)
         if 'sizes' in props:
@@ -119,6 +114,10 @@ class Split(SplitBase):
     def __init__(self, *objects, **params):
         if objects:
             params["objects"] = list(objects)
+        if "objects" in params:
+            objects = params["objects"]
+            if len(objects) > 2:
+                raise ValueError("Split component must have at most two children.")
         super().__init__(**params)
 
 

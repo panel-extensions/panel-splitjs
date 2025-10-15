@@ -80,6 +80,16 @@ def test_split_collapsed_programmatically(page):
     wait_until(lambda: split.collapsed is None, page)
 
 
+def test_split_sizes_programmatically(page):
+    split = Split(Button(name='Left'), Button(name='Right'), width=400)
+    serve_component(page, split)
+
+    split.sizes = (20, 80)
+    expect(page.locator('.split-panel').first).to_have_attribute('style', 'width: calc(20% - 4px);')
+    expect(page.locator('.split-panel').last).to_have_attribute('style', 'width: calc(80% - 4px);')
+    wait_until(lambda: split.sizes == (20, 80), page)
+
+
 @pytest.mark.parametrize('orientation', ['horizontal', 'vertical'])
 def test_split_click_toggle_button(page, orientation):
     kwargs = {'width': 400} if orientation == 'horizontal' else {'height': 400}
@@ -108,3 +118,21 @@ def test_split_click_toggle_button(page, orientation):
     expect(page.locator('.split-panel').last).to_have_attribute('style', f'{attr}: calc(1% - 4px);')
     wait_until(lambda: split.sizes == (100, 0), page)
     wait_until(lambda: split.collapsed == 1, page)
+
+
+@pytest.mark.parametrize('orientation', ['horizontal', 'vertical'])
+def test_multi_split(page, orientation):
+    kwargs = {'width': 400} if orientation == 'horizontal' else {'height': 400}
+    split = MultiSplit(Button(name='Left'), Button(name='Middle'), Button(name='Right'), orientation=orientation, **kwargs)
+    serve_component(page, split)
+    expect(page.locator('.split-panel')).to_have_count(3)
+    expect(page.locator('.split')).to_have_class(f'split multi-split {orientation}')
+
+    expect(page.locator('.bk-btn').first).to_have_text('Left')
+    expect(page.locator('.bk-btn').nth(1)).to_have_text('Middle')
+    expect(page.locator('.bk-btn').last).to_have_text('Right')
+
+    attr = "width" if orientation == "horizontal" else "height"
+    expect(page.locator('.split-panel').first).to_have_attribute('style', f'{attr}: calc(33.3333% - 4px);')
+    expect(page.locator('.split-panel').nth(1)).to_have_attribute('style', f'{attr}: calc(33.3333% - 8px);')
+    expect(page.locator('.split-panel').last).to_have_attribute('style', f'{attr}: calc(33.3333% - 4px);')
