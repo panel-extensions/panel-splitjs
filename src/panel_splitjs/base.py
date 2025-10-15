@@ -3,7 +3,6 @@ from pathlib import Path
 import param
 from bokeh.embed.bundle import extension_dirs
 from panel.custom import Children, JSComponent
-from panel.layout import Spacer
 from panel.layout.base import ListLike
 
 BASE_PATH = Path(__file__).parent
@@ -12,37 +11,61 @@ DIST_PATH = BASE_PATH / 'dist'
 extension_dirs['panel-splitjs'] = DIST_PATH
 
 
-class SplitChildren(Children):
-    """A Children parameter that only allows at most two items."""
+class Size(param.Parameter):
 
-    def _transform_value(self, val):
-        if not hasattr(self, 'owner'):
-            return None
-        if val is param.parameterized.Undefined:
-            return [Spacer(), Spacer()]
-        if any(v is None for v in val):
-            val[:] = [Spacer() if v is None else v for v in val]
-        if len(val) == 1:
-            val.append(Spacer())
-        if len(val) == 0:
-            val.extend([Spacer(), Spacer()])
-        val = super()._transform_value(val)
-        return val
+    __slots__ = ['length']
+
+    def __init__(self, default=None, length=None, **params):
+        super().__init__(default=default, **params)
+        self.length = length
 
     def _validate(self, val):
         super()._validate(val)
-        if val is None or len(val) <= 2:
+        if val is None:
             return
-        if self.owner is None:
-            objtype = ""
-        elif isinstance(self.owner, param.Parameterized):
-            objtype = self.owner.__class__.__name__
-        else:
-            objtype = self.owner.__name__
-        raise ValueError(f"{objtype} component must have at most two children.")
+        if self.length is not None and isinstance(val, tuple) and len(val) != self.length:
+            raise ValueError(f"Size parameter {self.name!r} must have length {self.length}")
+        if not (isinstance(val, (int, float)) or (isinstance(val, tuple) and all(isinstance(v, (int, float)) for v in val))):
+            raise ValueError(f"Size parameter {self.name!r} only takes int or float values")
 
 
-class Split(JSComponent, ListLike):
+class SplitBase(JSComponent, ListLike):
+
+    max_size = Size(default=None, doc="""
+        The maximum sizes of the panels (in pixels) either as a single value or a tuple.""")
+
+    min_size = Size(default=None, doc="""
+        The minimum sizes of the panels (in pixels) either as a single value or a tuple.""")
+
+    objects = Children(doc="""
+        The list of child objects that make up the layout.""")
+
+    orientation = param.Selector(default="horizontal", objects=["horizontal", "vertical"], doc="""
+        The orientation of the split panel. Default is horizontal.""")
+
+    sizes = param.NumericTuple(default=None, length=0, doc="""
+        The sizes of the panels (as percentages) on initialization. The value is automatically
+        synced to the sizes of the panels in the frontend.""")
+
+    step_size = param.Integer(default=1, doc="""
+        The step size (in pixels) at which the size of the panels can be changed.""")
+
+    snap_size = param.Integer(default=30, doc="""
+        Snap to minimum size at this offset in pixels.""")
+
+    _bundle = DIST_PATH  / "panel-splitjs.bundle.js"
+    _stylesheets = [DIST_PATH / "css" / "splitjs.css"]
+
+    __abstract = True
+
+    def _process_property_change(self, props):
+        props = super()._process_property_change(props)
+        if 'sizes' in props:
+            props['sizes'] = tuple(props['sizes'])
+        return props
+
+
+class Split(SplitBase):
     """
     Split is a component for creating a responsive split panel layout.
 
@@ -59,83 +82,82 @@ class Split(JSComponent, ListLike):
     and a secondary panel that can be toggled (like a chat interface with output display).
     """
 
-    collapsed = param.Boolean(default=False, doc="""
-        Whether the secondary panel is collapsed.
-        When True, only one panel is visible (determined by invert).
-        When False, both panels are visible according to expanded_sizes.""")
+    collapsed = param.Integer(default=None, doc="""
+        Whether the first or second panel is collapsed. 0 for first panel, 1 for second panel, None for not collapsed.""")
 
     expanded_sizes = param.NumericTuple(default=(50, 50), length=2, doc="""
         The sizes of the two panels when expanded (as percentages).
-        Default is (50, 50) which means the left panel takes up 35% of the space
-        and the right panel takes up 65% when expanded.
+        Default is (50, 50) .
         When invert=True, these percentages are automatically swapped.""")
 
-    invert = param.Boolean(default=False, constant=True, doc="""
-        Whether to invert the layout, changing the toggle button side and panel styles.""")
+    max_size = Size(default=None, length=2, doc="""
+        The maximum sizes of the panels (in pixels) either as a single value or a tuple of two values.""")
 
-    min_sizes = param.NumericTuple(default=(0, 0), length=2, doc="""
-        The minimum sizes of the two panels (in pixels).
-        Default is (0, 0) which allows both panels to fully collapse.
-        Set to (300, 0) or similar values if you want to enforce minimum widths during dragging.
-        When invert=True, these values are automatically swapped.""")
+    min_size = Size(default=0, length=2, doc="""
+        The minimum sizes of the panels (in pixels) either as a single value or a tuple of two values.""")
 
-    objects = SplitChildren(doc="""
+    objects = Children(doc="""
         The component to place in the left panel.
         When invert=True, this will appear on the right side.""")
 
-    orientation = param.Selector(default="horizontal", objects=["horizontal", "vertical"], doc="""
-        The orientation of the split panel. Default is horizontal.""")
-
-    show_buttons = param.Boolean(default=False, doc="""
+    show_buttons = param.Boolean(default=True, doc="""
         Whether to show the toggle buttons on the divider.
         When False, the buttons are hidden and panels can only be resized by dragging.""")
 
-    sizes = param.NumericTuple(default=(100, 0), length=2, doc="""
+    sizes = param.NumericTuple(default=(50, 50), length=2, doc="""
         The initial sizes of the two panels (as percentages).
-        Default is (100, 0) which means the left panel takes up all the space
+        Default is (50, 50) which means the left panel takes up 50% of the space
         and the right panel is not visible.""")
 
-    _bundle = DIST_PATH  / "panel-splitjs.bundle.js"
-    _esm = Path(__file__).parent / "models" / "splitjs.js"
-
-    _stylesheets = [DIST_PATH / "css" / "splitjs.css"]
+    _esm = Path(__file__).parent / "models" / "split.js"
 
     def __init__(self, *objects, **params):
         if objects:
             params["objects"] = list(objects)
+        if "objects" in params:
+            objects = params["objects"]
+            if len(objects) > 2:
+                raise ValueError("Split component must have at most two children.")
         super().__init__(**params)
-        if self.invert:
-            # Swap min_sizes when inverted
-            left_min, right_min = self.min_sizes
-            self.min_sizes = (right_min, left_min)
-
-            # Swap expanded_sizes when inverted
-            left_exp, right_exp = self.expanded_sizes
-            self.expanded_sizes = (right_exp, left_exp)
-
-    @param.depends("collapsed", watch=True)
-    def _send_collapsed_update(self):
-        """Send message to JS when collapsed state changes in Python"""
-        self._send_msg({"type": "update_collapsed", "collapsed": self.collapsed})
-
-    def _handle_msg(self, msg):
-        """Handle messages from JS"""
-        if 'collapsed' in msg:
-            collapsed = msg['collapsed']
-            with param.discard_events(self):
-                # Important to discard so when user drags the panel, it doesn't
-                # expand to the expanded sizes
-                self.collapsed = collapsed
 
 
 class HSplit(Split):
+    """
+    HSplit is a component for creating a responsive horizontal split panel layout.
+    """
 
     orientation = param.Selector(default="horizontal", objects=["horizontal"], readonly=True)
 
 
 class VSplit(Split):
+    """
+    VSplit is a component for creating a responsive vertical split panel layout.
+    """
 
     orientation = param.Selector(default="vertical", objects=["vertical"], readonly=True)
 
 
-__all__ = ["HSplit", "Split", "VSplit"]
+class MultiSplit(SplitBase):
+    """
+    MultiSplit is a component for creating a responsive multi-split panel layout.
+    """
+
+    min_size = Size(default=100, length=None, doc="""
+        The minimum sizes of the panels (in pixels) either as a single value or a tuple.""")
+
+    _esm = Path(__file__).parent / "models" / "multi_split.js"
+
+    def __init__(self, *objects, **params):
+        if objects:
+            params["objects"] = list(objects)
+        if "objects" in params:
+            objects = params["objects"]
+            self.param.sizes.length = len(objects)
+        super().__init__(**params)
+
+    @param.depends("objects", watch=True)
+    def _update_sizes(self):
+        self.param.sizes.length = len(self.objects)
+
+
+__all__ = ["HSplit", "MultiSplit", "Split", "VSplit"]
