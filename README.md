@@ -9,13 +9,13 @@ A responsive, draggable split panel component for [Panel](https://panel.holoviz.
 
 ## Features
 
-- **Draggable divider** - Resize panels by dragging the divider between them
-- **Collapsible panels** - Toggle panels open/closed with optional buttons
+- **Draggable dividers** - Resize panels by dragging the divider between them
+- **Collapsible panels** - Collapse individual panels with toggle buttons
 - **Flexible orientation** - Support for both horizontal and vertical splits
-- **Minimum size constraints** - Enforce minimum panel sizes to prevent over-collapse
-- **Smooth animations** - Beautiful transitions when toggling panels
+- **Size constraints** - Enforce minimum and maximum panel sizes
+- **Snap behavior** - Smart snapping to minimum sizes for better UX
 - **Customizable sizes** - Control initial and expanded panel sizes
-- **Invertible layout** - Swap panel positions and button locations
+- **Multi-panel support** - Create layouts with 2+ panels using `MultiSplit`
 
 ## Installation
 
@@ -43,7 +43,8 @@ pn.extension()
 split = Split(
     pn.pane.Markdown("## Left Panel\nContent here"),
     pn.pane.Markdown("## Right Panel\nMore content"),
-    sizes=(50, 50),  # Equal sizing
+    sizes=(50, 50),  # Equal sizing initially
+    min_size=100,     # Minimum 100px for each panel
     show_buttons=True
 )
 
@@ -75,6 +76,7 @@ split = HSplit(
     left_panel,
     right_panel,
     sizes=(70, 30),  # 70% left, 30% right
+    min_size=200,    # Minimum 200px for each panel
     show_buttons=True
 )
 
@@ -96,7 +98,7 @@ split = VSplit(
     top_panel,
     bottom_panel,
     sizes=(60, 40),
-    orientation="vertical"
+    min_size=150
 )
 
 split.servable()
@@ -110,72 +112,90 @@ from panel_splitjs import Split
 
 pn.extension()
 
-# Start with sidebar collapsed
+# Start with right panel collapsed
 split = Split(
     pn.pane.Markdown("## Main Content"),
     pn.pane.Markdown("## Collapsible Sidebar"),
-    collapsed=True,
+    collapsed=1,  # 0 for first panel, 1 for second panel, None for not collapsed
     expanded_sizes=(65, 35),  # When expanded, 65% main, 35% sidebar
     show_buttons=True,
-    min_sizes=(200, 200)  # Minimum 200px for each panel
+    min_size=(200, 200)  # Minimum 200px for each panel
 )
 
 # Toggle collapse programmatically
 button = pn.widgets.Button(name="Toggle Sidebar")
-button.on_click(lambda e: setattr(split, 'collapsed', not split.collapsed))
+def toggle(event):
+    split.collapsed = None if split.collapsed == 1 else 1
+button.on_click(toggle)
 
 pn.Column(button, split).servable()
 ```
 
-### Inverted Layout
+### Multi-Panel Split
 
 ```python
 import panel as pn
-from panel_splitjs import Split
+from panel_splitjs import MultiSplit
 
 pn.extension()
 
-# Inverted: right panel collapses, button on right side
-split = Split(
-    pn.pane.Markdown("## Secondary Panel"),
-    pn.pane.Markdown("## Main Content"),
-    invert=True,  # Swap layout and button position
-    collapsed=True,
-    expanded_sizes=(35, 65),
-    show_buttons=True
+# Create a layout with three panels
+multi = MultiSplit(
+    pn.pane.Markdown("## Panel 1"),
+    pn.pane.Markdown("## Panel 2"),
+    pn.pane.Markdown("## Panel 3"),
+    sizes=(30, 40, 30),  # Three panels with custom sizing
+    min_size=100,        # Minimum 100px for each panel
+    orientation="horizontal"
 )
 
-split.servable()
+multi.servable()
 ```
 
 ## API Reference
 
 ### Split
 
-The main split panel component with full customization options.
+The main split panel component for creating two-panel layouts with collapsible functionality.
 
 **Parameters:**
 
 - `objects` (list): Two Panel components to display in the split panels
-- `collapsed` (bool, default=False): Whether the secondary panel is collapsed
-- `expanded_sizes` (tuple, default=(50, 50)): Percentage sizes when expanded (must sum to 100)
-- `invert` (bool, default=False): Swap panel positions and button locations (constant after init)
-- `min_sizes` (tuple, default=(0, 0)): Minimum sizes in pixels for each panel
-- `orientation` (str, default="horizontal"): Either "horizontal" or "vertical"
-- `show_buttons` (bool, default=False): Show collapse/expand toggle buttons
-- `sizes` (tuple, default=(100, 0)): Initial percentage sizes (must sum to 100)
+- `collapsed` (int | None, default=None): Which panel is collapsed - `0` for first panel, `1` for second panel, `None` for not collapsed
+- `expanded_sizes` (tuple, default=(50, 50)): Percentage sizes when both panels are expanded
+- `max_size` (int | tuple, default=None): Maximum sizes in pixels - single value applies to both panels, tuple for individual sizes
+- `min_size` (int | tuple, default=0): Minimum sizes in pixels - single value applies to both panels, tuple for individual sizes
+- `orientation` (str, default="horizontal"): Either `"horizontal"` or `"vertical"`
+- `show_buttons` (bool, default=True): Show collapse/expand toggle buttons on the divider
+- `sizes` (tuple, default=(50, 50)): Initial percentage sizes of the panels
+- `snap_size` (int, default=30): Snap to minimum size at this offset in pixels
+- `step_size` (int, default=1): Step size in pixels at which panel sizes can be changed
 
 ### HSplit
 
 Horizontal split panel (convenience class).
 
-Same parameters as `Split` but `orientation` is locked to "horizontal".
+Same parameters as `Split` but `orientation` is locked to `"horizontal"`.
 
 ### VSplit
 
 Vertical split panel (convenience class).
 
-Same parameters as `Split` but `orientation` is locked to "vertical".
+Same parameters as `Split` but `orientation` is locked to `"vertical"`.
+
+### MultiSplit
+
+Multi-panel split component for creating layouts with three or more panels.
+
+**Parameters:**
+
+- `objects` (list): List of Panel components to display (3 or more)
+- `max_size` (int | tuple, default=None): Maximum sizes in pixels - single value applies to all panels, tuple for individual sizes
+- `min_size` (int | tuple, default=100): Minimum sizes in pixels - single value applies to all panels, tuple for individual sizes
+- `orientation` (str, default="horizontal"): Either `"horizontal"` or `"vertical"`
+- `sizes` (tuple, default=None): Initial percentage sizes of the panels (length must match number of objects)
+- `snap_size` (int, default=30): Snap to minimum size at this offset in pixels
+- `step_size` (int, default=1): Step size in pixels at which panel sizes can be changed
 
 ## Common Use Cases
 
@@ -193,10 +213,10 @@ output = pn.Column("# Output Area")
 split = Split(
     chat,
     output,
-    collapsed=False,
+    collapsed=None,  # Both panels visible
     expanded_sizes=(50, 50),
     show_buttons=True,
-    min_sizes=(300, 300)
+    min_size=(300, 300)  # Minimum 300px for each panel
 )
 
 split.servable()
@@ -221,16 +241,16 @@ visualization = pn.pane.Markdown("## Main Visualization Area")
 split = Split(
     controls,
     visualization,
-    collapsed=True,
+    collapsed=0,  # Start with controls collapsed
     expanded_sizes=(25, 75),
     show_buttons=True,
-    min_sizes=(250, 400)
+    min_size=(250, 400)  # Minimum sizes for each panel
 )
 
 split.servable()
 ```
 
-### Responsive Layout
+### Responsive Layout with Size Constraints
 
 ```python
 import panel as pn
@@ -238,16 +258,71 @@ from panel_splitjs import Split
 
 pn.extension()
 
-# Automatically adjust to available space
 split = Split(
     pn.pane.Markdown("## Panel 1\nResponsive content"),
     pn.pane.Markdown("## Panel 2\nMore responsive content"),
     sizes=(50, 50),
-    min_sizes=(200, 200),  # Prevent panels from getting too small
+    min_size=200,        # Minimum 200px per panel
+    max_size=800,        # Maximum 800px per panel
+    snap_size=50,        # Snap to min size when within 50px
     show_buttons=True
 )
 
 split.servable()
+```
+
+### Complex Multi-Panel Layout
+
+```python
+import panel as pn
+from panel_splitjs import MultiSplit
+
+pn.extension()
+
+# Create a four-panel layout
+sidebar = pn.Column("## Sidebar", pn.widgets.Select(options=["A", "B", "C"]))
+main = pn.pane.Markdown("## Main Content Area")
+detail = pn.pane.Markdown("## Detail Panel")
+console = pn.pane.Markdown("## Console Output")
+
+multi = MultiSplit(
+    sidebar,
+    main,
+    detail,
+    console,
+    sizes=(15, 40, 25, 20),  # Custom sizing for each panel
+    min_size=(150, 300, 200, 150),  # Individual minimums
+    orientation="horizontal"
+)
+
+multi.servable()
+```
+
+### Nested Splits
+
+```python
+import panel as pn
+from panel_splitjs import HSplit, VSplit
+
+pn.extension()
+
+# Create a nested layout: horizontal split with vertical split on right
+left = pn.pane.Markdown("## Left Panel")
+
+# Right side has a vertical split
+top_right = pn.pane.Markdown("## Top Right")
+bottom_right = pn.pane.Markdown("## Bottom Right")
+right = VSplit(top_right, bottom_right, sizes=(60, 40))
+
+# Main horizontal split
+layout = HSplit(
+    left,
+    right,
+    sizes=(30, 70),
+    min_size=200
+)
+
+layout.servable()
 ```
 
 ## Development
