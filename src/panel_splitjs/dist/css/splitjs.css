@@ -2,7 +2,7 @@
   display: flex;
   height: 100%;
   width: 100%;
-  overflow: clip; /* Clip overflow to prevent scrollbars; inner content will have their own */
+  overflow: clip;
 }
 
 .split.horizontal {
@@ -29,15 +29,24 @@
   position: relative;
 }
 
-
-.split > div:nth-child(1) {
+.split.single-split > div:nth-child(1) {
   overflow: clip;
 }
 
-.split > div:nth-child(2) {
+.split.single-split > div:nth-child(2) {
   overflow: visible;
   position: relative;
   width: 100%;
+}
+
+/* Ensure buttons stay visible even when panels are collapsed */
+.split.single-split > div:first-child {
+  min-width: 0 !important; /* Override any minimum width */
+}
+
+.split.single-split > div:nth-child(2) {
+  overflow: visible !important; /* Ensure buttons remain visible */
+  position: relative !important;
 }
 
 /* Content wrapper styles */
@@ -47,6 +56,11 @@
   display: contents;
   box-sizing: border-box;
   padding-inline: 0.5rem;
+}
+
+.left-content-wrapper {
+  width: 100%;
+  height: 100%;
 }
 
 /* Toggle button basic styles */
@@ -91,16 +105,6 @@
   top: 2px;
   left: 50%;
   transform: translateX(-50%);
-}
-
-/* Ensure buttons stay visible even when panels are collapsed */
-.split > div:first-child {
-  min-width: 0 !important; /* Override any minimum width */
-}
-
-.split > div:nth-child(2) {
-  overflow: visible !important; /* Ensure buttons remain visible */
-  position: relative !important;
 }
 
 /* Collapsed state */
