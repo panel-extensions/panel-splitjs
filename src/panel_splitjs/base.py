@@ -3,43 +3,12 @@ from pathlib import Path
 import param
 from bokeh.embed.bundle import extension_dirs
 from panel.custom import Children, JSComponent
-from panel.layout import Spacer
 from panel.layout.base import ListLike
 
 BASE_PATH = Path(__file__).parent
 DIST_PATH = BASE_PATH / 'dist'
 
 extension_dirs['panel-splitjs'] = DIST_PATH
-
-
-class SplitChildren(Children):
-    """A Children parameter that only allows at most two items."""
-
-    def _transform_value(self, val):
-        if not hasattr(self, 'owner'):
-            return None
-        if val is param.parameterized.Undefined:
-            return [Spacer(), Spacer()]
-        if any(v is None for v in val):
-            val[:] = [Spacer() if v is None else v for v in val]
-        if len(val) == 1:
-            val.append(Spacer())
-        if len(val) == 0:
-            val.extend([Spacer(), Spacer()])
-        val = super()._transform_value(val)
-        return val
-
-    def _validate(self, val):
-        super()._validate(val)
-        if val is None or len(val) <= 2:
-            return
-        if self.owner is None:
-            objtype = ""
-        elif isinstance(self.owner, param.Parameterized):
-            objtype = self.owner.__class__.__name__
-        else:
-            objtype = self.owner.__name__
-        raise ValueError(f"{objtype} component must have at most two children.")
 
 
 class Size(param.Parameter):
@@ -118,10 +87,8 @@ class Split(SplitBase):
     and a secondary panel that can be toggled (like a chat interface with output display).
     """
 
-    collapsed = param.Boolean(default=False, doc="""
-        Whether the secondary panel is collapsed.
-        When True, only one panel is visible (determined by invert).
-        When False, both panels are visible according to expanded_sizes.""")
+    collapsed = param.Integer(default=None, doc="""
+        Whether the first or second panel is collapsed. 0 for first panel, 1 for second panel, None for not collapsed.""")
 
     expanded_sizes = param.NumericTuple(default=(50, 50), length=2, doc="""
         The sizes of the two panels when expanded (as percentages).
@@ -134,7 +101,7 @@ class Split(SplitBase):
     min_size = Size(default=0, length=2, doc="""
         The minimum sizes of the panels (in pixels) either as a single value or a tuple of two values.""")
 
-    objects = SplitChildren(doc="""
+    objects = Children(doc="""
         The component to place in the left panel.
         When invert=True, this will appear on the right side.""")
 

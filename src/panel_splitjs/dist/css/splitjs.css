@@ -58,11 +58,6 @@
   padding-inline: 0.5rem;
 }
 
-.left-content-wrapper {
-  width: 100%;
-  height: 100%;
-}
-
 /* Toggle button basic styles */
 .toggle-button-left, .toggle-button-right, .toggle-button-up, .toggle-button-down {
   position: absolute;
