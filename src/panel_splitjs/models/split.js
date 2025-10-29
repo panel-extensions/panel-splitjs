@@ -130,6 +130,7 @@ export function render({ model, el }) {
       split_instance.setSizes([ls, rs])
       sizes = [ls, rs]
       model.sizes = [ls, rs]
+      window.dispatchEvent(new Event('resize'))
     }
   }
 
@@ -167,6 +168,7 @@ export function render({ model, el }) {
         right_arrow_button.classList.remove("animated")
       }, 1500)
     }
+    window.dispatchEvent(new Event('resize'))
     split_div.classList.remove("loading")
   })
 
