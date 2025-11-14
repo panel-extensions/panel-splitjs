@@ -14,9 +14,9 @@ export function render({ model, el }) {
       const current = parent.children[i]
       if (current?.id === child.id) continue
       if (current) {
-	parent.insertBefore(child, current)
+        parent.insertBefore(child, current)
       } else {
-	parent.append(child)
+        parent.append(child)
       }
     }
 
@@ -42,10 +42,10 @@ export function render({ model, el }) {
       // Try to reuse an existing split_item
       let split_item = el.querySelector(`#${id}`)
       if (split_item == null) {
-	split_item = document.createElement("div")
-	split_item.className = "split-panel"
-	split_item.id = id
-	split_item.replaceChildren(obj)
+        split_item = document.createElement("div")
+        split_item.className = "split-panel"
+        split_item.id = id
+        split_item.replaceChildren(obj)
       }
 
       split_items.push(split_item)
@@ -63,17 +63,17 @@ export function render({ model, el }) {
       snapOffset: model.snap_size || 30,
       gutterSize: 8,
       gutter: (index, direction) => {
-	const gutter = document.createElement('div')
-	gutter.className = `gutter gutter-${direction}`
-	const divider = document.createElement('div')
-	divider.className = "divider"
-	gutter.append(divider)
-	return gutter
+        const gutter = document.createElement('div')
+        gutter.className = `gutter gutter-${direction}`
+        const divider = document.createElement('div')
+        divider.className = "divider"
+        gutter.append(divider)
+        return gutter
       },
       direction: model.orientation,
       onDragEnd: (new_sizes) => {
-	sizes = new_sizes
-	this.model.sizes = sizes
+        sizes = new_sizes
+        this.model.sizes = sizes
       }
     })
   }
