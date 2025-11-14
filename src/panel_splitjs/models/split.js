@@ -26,6 +26,12 @@ export function render({ model, el }) {
   split0.append(left_content_wrapper)
   split1.append(right_content_wrapper)
 
+  model.on("objects", () => {
+    const [left, right] = model.get_child("objects")
+    left_content_wrapper.replaceChildren(left)
+    right_content_wrapper.replaceChildren(right)
+  })
+
   let left_arrow_button, right_arrow_button
   let left_click_count = 0
   let right_click_count = 0
@@ -91,6 +97,14 @@ export function render({ model, el }) {
     dragInterval: model.step_size,
     snapOffset: model.snap_size,
     gutterSize: 8,
+    gutter: (index, direction) => {
+      const gutter = document.createElement('div')
+      gutter.className = `gutter gutter-${direction}`
+      const divider = document.createElement('div')
+      divider.className = "divider"
+      gutter.append(divider)
+      return gutter
+    },
     direction: model.orientation,
     onDrag: (sizes) => {
       const new_collapsed_state = sizes[0] <= COLLAPSED_SIZE ? 0 : (sizes[1] <= COLLAPSED_SIZE ? 1 : null)

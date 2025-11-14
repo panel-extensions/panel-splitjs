@@ -146,6 +146,7 @@
 .gutter.gutter-horizontal::after {
   width: 10px;
   height: 24px;
+  cursor: col-resize;
 }
 
 .gutter.gutter-vertical::after {
@@ -153,13 +154,45 @@
   height: 10px;
   -webkit-mask-image: url("handle_vertical.svg");
   mask-image: url("handle_vertical.svg");
+  cursor: row-resize;
 }
 
-.split > div:nth-child(2) > div:not(.toggle-button-left):not(.toggle-button-right):not(.toggle-button-up):not(.toggle-button-down) {
+.gutter > .divider {
+  --gap: 40px;
+  --thickness: 1px;
+  --color: var(--border-color);
+  background: var(--color);
+  position: absolute;
+}
+
+/* Horizontal variant */
+.gutter-vertical > .divider {
+  top: 50%;
   width: 100%;
+  height: var(--thickness);
+  background:
+    linear-gradient(to right,
+      var(--color) 0,
+      var(--color) calc(50% - var(--gap) / 2),
+      transparent calc(50% - var(--gap) / 2),
+      transparent calc(50% + var(--gap) / 2),
+      var(--color) calc(50% + var(--gap) / 2),
+      var(--color) 100%);
+}
+
+/* Vertical variant */
+.gutter-horizontal > .divider {
+  left: 50%,
   height: 100%;
-  overflow: auto;
-  padding-top: 36px; /* Space for the toggle buttons */
+  width: var(--thickness);
+  background:
+    linear-gradient(to bottom,
+      var(--color) 0,
+      var(--color) calc(50% - var(--gap) / 2),
+      transparent calc(50% - var(--gap) / 2),
+      transparent calc(50% + var(--gap) / 2),
+      var(--color) calc(50% + var(--gap) / 2),
+      var(--color) 100%);
 }
 
 /* Toggle button base styles */

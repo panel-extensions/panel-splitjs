@@ -55,6 +55,7 @@ class SplitBase(JSComponent, ListLike):
 
     _bundle = DIST_PATH  / "panel-splitjs.bundle.js"
     _stylesheets = [DIST_PATH / "css" / "splitjs.css"]
+    _render_policy = "manual"
 
     __abstract = True
 
