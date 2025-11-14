@@ -62,6 +62,14 @@ export function render({ model, el }) {
       dragInterval: model.step_size || 1,
       snapOffset: model.snap_size || 30,
       gutterSize: 8,
+      gutter: (index, direction) => {
+	const gutter = document.createElement('div')
+	gutter.className = `gutter gutter-${direction}`
+	const divider = document.createElement('div')
+	divider.className = "divider"
+	gutter.append(divider)
+	return gutter
+      },
       direction: model.orientation,
       onDragEnd: (new_sizes) => {
 	sizes = new_sizes
