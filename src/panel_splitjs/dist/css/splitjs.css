@@ -14,7 +14,7 @@
 }
 
 /* Style for initial load to prevent FOUC */
-.split.loading {
+.loading {
   visibility: hidden;
 }
 
