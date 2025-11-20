@@ -3,12 +3,20 @@ from pathlib import Path
 import param
 from bokeh.embed.bundle import extension_dirs
 from panel.custom import Children, JSComponent
+from panel.io.resources import EXTENSION_CDN
 from panel.layout.base import ListLike
+from panel.util import base_version
 
+from .__version import __version__  # noqa
+
+IS_RELEASE = __version__ == base_version(__version__)
 BASE_PATH = Path(__file__).parent
 DIST_PATH = BASE_PATH / 'dist'
+CDN_BASE = f"https://cdn.holoviz.org/panel-splitjs/v{base_version(__version__)}"
+CDN_DIST = f"{CDN_BASE}/panel-material-ui.bundle.js"
 
 extension_dirs['panel-splitjs'] = DIST_PATH
+EXTENSION_CDN[DIST_PATH] = CDN_BASE
 
 
 class Size(param.Parameter):
