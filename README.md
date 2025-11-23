@@ -41,15 +41,18 @@ pn.extension()
 
 # Create a simple split layout
 split = Split(
-    pn.pane.Markdown("## Left Panel\nContent here"),
-    pn.pane.Markdown("## Right Panel\nMore content"),
+    pn.pane.Markdown("## Left Panel\nContent here", width=150, margin=25),
+    pn.pane.Markdown("## Right Panel\nMore content", width=150, margin=25),
     sizes=(50, 50),  # Equal sizing initially
-    min_size=100,     # Minimum 100px for each panel
-    show_buttons=True
+    min_size=150,     # Minimum 150px for each panel
+    show_buttons=True, # Show collapse/expand buttons on the divider
+    width=500
 )
 
 split.servable()
 ```
+
+![Quick Start Example](docs/assets/images/quick-start.gif)
 
 ## Usage Examples
 
@@ -59,29 +62,33 @@ split.servable()
 import panel as pn
 from panel_splitjs import HSplit
 
-pn.extension()
+pn.extension(sizing_mode="stretch_width")
 
 left_panel = pn.Column(
     "# Main Content",
     pn.widgets.TextInput(name="Input"),
-    pn.pane.Markdown("This is the main content area.")
+    pn.pane.Markdown("This is the main content area."),
+    margin=25, # To separate toggle button and column
 )
 
 right_panel = pn.Column(
     "# Sidebar",
     pn.widgets.Select(name="Options", options=["A", "B", "C"]),
+    margin=25, # To separate toggle button and column
 )
 
 split = HSplit(
     left_panel,
     right_panel,
     sizes=(70, 30),  # 70% left, 30% right
-    min_size=200,    # Minimum 200px for each panel
-    show_buttons=True
+    min_size=300,    # Minimum 300px for each panel
+    width=800
 )
 
 split.servable()
 ```
+
+![Basic Horizontal Split Example](docs/assets/images/basic-horizontal-split.png)
 
 ### Vertical Split
 
