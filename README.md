@@ -98,18 +98,23 @@ from panel_splitjs import VSplit
 
 pn.extension()
 
-top_panel = pn.pane.Markdown("## Top Section\nHeader content")
-bottom_panel = pn.pane.Markdown("## Bottom Section\nFooter content")
+top_panel = pn.pane.Markdown("## Top Section\nHeader content", margin=(10,10,25,10))
+bottom_panel = pn.pane.Markdown("## Bottom Section\nFooter content", margin=(25,10,10,10))
 
 split = VSplit(
     top_panel,
     bottom_panel,
     sizes=(60, 40),
-    min_size=150
+    min_size=150,
+    height=500,
+    width=300,
+    styles={"border": "1px solid gray"}
 )
 
 split.servable()
 ```
+
+![Basic Vertical Split Example](docs/assets/images/basic-vertical-split.png)
 
 ### Collapsible Sidebar
 
