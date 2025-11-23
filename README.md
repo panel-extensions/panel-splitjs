@@ -46,7 +46,7 @@ split = Split(
     sizes=(50, 50),  # Equal sizing initially
     min_size=150,     # Minimum 150px for each panel
     show_buttons=True, # Show collapse/expand buttons on the divider
-    width=500
+    sizing_mode="stretch_both",
 )
 
 split.servable()
@@ -82,7 +82,8 @@ split = HSplit(
     right_panel,
     sizes=(70, 30),  # 70% left, 30% right
     min_size=300,    # Minimum 300px for each panel
-    width=800
+    sizing_mode="stretch_width",
+    height=250,
 )
 
 split.servable()
@@ -162,7 +163,8 @@ multi = MultiSplit(
     pn.pane.Markdown("## Panel 3"),
     sizes=(30, 40, 30),  # Three panels with custom sizing
     min_size=100,        # Minimum 100px for each panel
-    orientation="horizontal"
+    orientation="horizontal",
+    sizing_mode="stretch_both",
 )
 
 multi.servable()
@@ -225,8 +227,9 @@ from panel_splitjs import Split
 
 pn.extension()
 
-chat = pn.chat.ChatInterface()
-output = pn.Column("# Output Area")
+with pn.config.set(sizing_mode="stretch_width"):
+    chat = pn.chat.ChatInterface(margin=(5,25,5,5))
+    output = pn.Column("# Output Area")
 
 split = Split(
     chat,
@@ -234,7 +237,8 @@ split = Split(
     collapsed=None,  # Both panels visible
     expanded_sizes=(50, 50),
     show_buttons=True,
-    min_size=(300, 300)  # Minimum 300px for each panel
+    min_size=(600, 300),  # Minimum 300px for each panel
+    sizing_mode="stretch_both",
 )
 
 split.servable()
