@@ -27,31 +27,34 @@ def test_split(page, orientation):
     expect(page.locator('.split-panel').last).to_have_attribute('style', f'{attr}: calc(50% - 4px);')
 
 
-def test_split_min_size_and_total_width(page):
+@pytest.mark.parametrize('orientation', ['horizontal', 'vertical'])
+def test_split_min_size_and_total_width(page, orientation):
     split = Split(
         Markdown("## Left Panel\nContent here", width=150, margin=25),
         Markdown("## Right Panel\nMore content", width=150, margin=25),
         sizes=(50, 50),  # Equal sizing initially
         min_size=300,    # Minimum 300px for each panel
         show_buttons=True,
+        orientation=orientation
     )
     serve_component(page, split)
 
-    # Check total width is 608px
-    expect(page.locator(".single-split")).to_have_attribute("style", "min-width: 608px;")
+    # Check total width/height is 608px
+    attr = "width" if orientation == "horizontal" else "height"
+    expect(page.locator(".single-split")).to_have_attribute("style", f"min-{attr}: 608px;")
 
     # Collapse left panel using the left button
     left_button = page.locator(".toggle-button-left,.toggle-button-up").first
     left_button.click()
     # Wait to ensure UI has updated; the left panel should not collapse below min_size=300px,
-    # so after collapse, its width should be 300px.
-    expect(page.locator(".split-panel").first).to_have_css("width", "300px")
+    # so after collapse, its width/height should be 300px.
+    expect(page.locator(".split-panel").first).to_have_css(attr, "300px")
 
     # Collapse right panel using the right button
     right_button = page.locator(".toggle-button-right,.toggle-button-down").first
     right_button.click()
     # Wait, then check right does not collapse below 300px
-    expect(page.locator(".split-panel").last).to_have_css("width", "300px")
+    expect(page.locator(".split-panel").last).to_have_css(attr, "300px")
 
 
 def test_split_sizes(page):

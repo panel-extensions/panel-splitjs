@@ -8,17 +8,30 @@ export function render({ model, el }) {
   split_div.classList.add("loading")
 
   const [left_min, right_min] = Array.isArray(model.min_size) ? model.min_size : [model.min_size, model.min_size]
-  split_div.style.minWidth = `${left_min + right_min + 8}px`
+
+  if (model.orientation === "horizontal") {
+    split_div.style.minWidth = `${left_min + right_min + 8}px`
+  } else {
+    split_div.style.minHeight = `${left_min + right_min + 8}px`
+  }
 
   const split0 = document.createElement("div")
   split0.className = "split-panel"
   if (left_min) {
-    split0.style.minWidth = `${left_min}px`
+    if (model.orientation === "horizontal") {
+      split0.style.minWidth = `${left_min}px`
+    } else {
+      split0.style.minHeight = `${left_min}px`
+    }
   }
   const split1 = document.createElement("div")
   split1.className = "split-panel"
   if (right_min) {
-    split1.style.minWidth = `${right_min}px`
+    if (model.orientation === "horizontal") {
+      split1.style.minWidth = `${right_min}px`
+    } else {
+      split1.style.minHeight = `${right_min}px`
+    }
   }
   split_div.append(split0, split1)
 
