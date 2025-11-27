@@ -56,6 +56,39 @@ def test_split_min_size_and_total_width(page, orientation):
     # Wait, then check right does not collapse below 300px
     expect(page.locator(".split-panel").last).to_have_css(attr, "300px")
 
+@pytest.mark.parametrize('orientation', ['horizontal', 'vertical'])
+def test_split_min_size_one_side(page, orientation):
+    # Only first panel has a min_size of 300px, second is unconstrained
+    split = Split(
+        Markdown("## Left", width=150),
+        Markdown("## Right", width=150),
+        sizes=(50, 50),
+        min_size=(300, None),
+        show_buttons=True,
+        orientation=orientation,
+        width=600 if orientation == "horizontal" else None,
+        height=600 if orientation == "vertical" else None
+    )
+    serve_component(page, split)
+
+    attr = "width" if orientation == "horizontal" else "height"
+    # The minimum size style is still 308px (because None becomes 0, so 300+0+8)
+    expect(page.locator(".single-split")).to_have_attribute("style", f"min-{attr}: 308px;")
+
+    # Collapse left panel -- it should not collapse below 300px
+    left_button = page.locator(".toggle-button-left,.toggle-button-up").first
+    left_button.click()
+    expect(page.locator(".split-panel").first).to_have_css(attr, "300px")
+
+    # Collapse right panel -- right can collapse to minimum, which is 5px (default collapsed size)
+    right_button = page.locator(".toggle-button-right,.toggle-button-down").first
+    right_button.click()
+    # The right panel should be collapsed to zero
+    expect(page.locator(".split-panel").last).to_have_css(attr, "0px")
+
+    # The left panel still stays at its min_size
+    expect(page.locator(".split-panel").first).to_have_css(attr, "592px")
+
 
 def test_split_sizes(page):
     split = Split(Button(name='Left'), Button(name='Right'), sizes=(40, 60), width=400)

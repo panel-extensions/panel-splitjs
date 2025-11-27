@@ -33,7 +33,7 @@ class Size(param.Parameter):
             return
         if self.length is not None and isinstance(val, tuple) and len(val) != self.length:
             raise ValueError(f"Size parameter {self.name!r} must have length {self.length}")
-        if not (isinstance(val, (int, float)) or (isinstance(val, tuple) and all(isinstance(v, (int, float)) for v in val))):
+        if not (isinstance(val, (int, float)) or (isinstance(val, tuple) and all(isinstance(v, (int, float)) or v is None for v in val))):
             raise ValueError(f"Size parameter {self.name!r} only takes int or float values")
 
 
