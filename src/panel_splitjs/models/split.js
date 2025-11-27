@@ -12,8 +12,14 @@ export function render({ model, el }) {
 
   const split0 = document.createElement("div")
   split0.className = "split-panel"
+  if (left_min) {
+    split0.style.minWidth = `${left_min}px`
+  }
   const split1 = document.createElement("div")
   split1.className = "split-panel"
+  if (right_min) {
+    split1.style.minWidth = `${right_min}px`
+  }
   split_div.append(split0, split1)
 
   const left_content_wrapper = document.createElement("div")
