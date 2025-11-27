@@ -7,10 +7,32 @@ export function render({ model, el }) {
   split_div.className = `split single-split ${model.orientation}`
   split_div.classList.add("loading")
 
+  const [left_min, right_min] = Array.isArray(model.min_size) ? model.min_size : [model.min_size, model.min_size]
+
+  if (model.orientation === "horizontal") {
+    split_div.style.minWidth = `${left_min + right_min + 8}px`
+  } else {
+    split_div.style.minHeight = `${left_min + right_min + 8}px`
+  }
+
   const split0 = document.createElement("div")
   split0.className = "split-panel"
+  if (left_min) {
+    if (model.orientation === "horizontal") {
+      split0.style.minWidth = `${left_min}px`
+    } else {
+      split0.style.minHeight = `${left_min}px`
+    }
+  }
   const split1 = document.createElement("div")
   split1.className = "split-panel"
+  if (right_min) {
+    if (model.orientation === "horizontal") {
+      split1.style.minWidth = `${right_min}px`
+    } else {
+      split1.style.minHeight = `${right_min}px`
+    }
+  }
   split_div.append(split0, split1)
 
   const left_content_wrapper = document.createElement("div")
@@ -63,7 +85,6 @@ export function render({ model, el }) {
         new_sizes = [0, 100]
         left_click_count = 0
       }
-      model.collapsed = is_collapsed
       sync_ui(new_sizes, true)
     })
 
@@ -80,7 +101,6 @@ export function render({ model, el }) {
         new_sizes = [100, 0]
         right_click_count = 0
       }
-      model.collapsed = is_collapsed
       sync_ui(new_sizes, true)
     })
   }
@@ -123,8 +143,8 @@ export function render({ model, el }) {
   })
 
   function sync_ui(sizes = null, resize = false) {
-    const left_panel_hidden = sizes ? sizes[0] <= COLLAPSED_SIZE : false
-    const right_panel_hidden = sizes ? sizes[1] <= COLLAPSED_SIZE : false
+    const left_panel_hidden = sizes ? ((sizes[0] <= COLLAPSED_SIZE) && (left_min < COLLAPSED_SIZE)) : false
+				       const right_panel_hidden = sizes ? ((sizes[1] <= COLLAPSED_SIZE) && (right_min < COLLAPSED_SIZE)) : false
 
     let [ls, rs] = sizes
     if (right_panel_hidden) {
@@ -143,8 +163,8 @@ export function render({ model, el }) {
     if (resize) {
       split_instance.setSizes([ls, rs])
       sizes = [ls, rs]
-      model.sizes = [ls, rs]
       window.dispatchEvent(new Event('resize'))
+      requestAnimationFrame(() => { model.sizes = split_instance.getSizes() })
     }
   }
 
@@ -153,6 +173,7 @@ export function render({ model, el }) {
       return
     }
     sizes = model.sizes
+    model.collapsed = (1-sizes[0]) >= 0 ? 0 : (1-sizes[1]) >= 0 ? 1 : null
     sync_ui(sizes, true)
   })
 

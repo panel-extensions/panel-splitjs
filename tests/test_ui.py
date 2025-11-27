@@ -3,6 +3,7 @@ import pytest
 pytest.importorskip('playwright')
 
 from panel.tests.util import serve_component, wait_until
+from panel.pane import Markdown
 from panel.widgets import Button
 from panel_splitjs import MultiSplit, Split
 from playwright.sync_api import expect
@@ -24,6 +25,69 @@ def test_split(page, orientation):
     attr = "width" if orientation == "horizontal" else "height"
     expect(page.locator('.split-panel').first).to_have_attribute('style', f'{attr}: calc(50% - 4px);')
     expect(page.locator('.split-panel').last).to_have_attribute('style', f'{attr}: calc(50% - 4px);')
+
+
+@pytest.mark.parametrize('orientation', ['horizontal', 'vertical'])
+def test_split_min_size_and_total_width(page, orientation):
+    split = Split(
+        Markdown("## Left Panel\nContent here", width=150, margin=25),
+        Markdown("## Right Panel\nMore content", width=150, margin=25),
+        sizes=(50, 50),  # Equal sizing initially
+        min_size=300,    # Minimum 300px for each panel
+        show_buttons=True,
+        orientation=orientation
+    )
+    serve_component(page, split)
+
+    # Check total width/height is 608px
+    attr = "width" if orientation == "horizontal" else "height"
+    expect(page.locator(".single-split")).to_have_attribute("style", f"min-{attr}: 608px;")
+
+    # Collapse left panel using the left button
+    left_button = page.locator(".toggle-button-left,.toggle-button-up").first
+    left_button.click()
+    # Wait to ensure UI has updated; the left panel should not collapse below min_size=300px,
+    # so after collapse, its width/height should be 300px.
+    expect(page.locator(".split-panel").first).to_have_css(attr, "300px")
+
+    # Collapse right panel using the right button
+    right_button = page.locator(".toggle-button-right,.toggle-button-down").first
+    right_button.click()
+    # Wait, then check right does not collapse below 300px
+    expect(page.locator(".split-panel").last).to_have_css(attr, "300px")
+
+@pytest.mark.parametrize('orientation', ['horizontal', 'vertical'])
+def test_split_min_size_one_side(page, orientation):
+    # Only first panel has a min_size of 300px, second is unconstrained
+    split = Split(
+        Markdown("## Left", width=150),
+        Markdown("## Right", width=150),
+        sizes=(50, 50),
+        min_size=(300, None),
+        show_buttons=True,
+        orientation=orientation,
+        width=600 if orientation == "horizontal" else None,
+        height=600 if orientation == "vertical" else None
+    )
+    serve_component(page, split)
+
+    attr = "width" if orientation == "horizontal" else "height"
+    # The minimum size style is still 308px (because None becomes 0, so 300+0+8)
+    expect(page.locator(".single-split")).to_have_attribute("style", f"min-{attr}: 308px;")
+
+    # Collapse left panel -- it should not collapse below 300px
+    left_button = page.locator(".toggle-button-left,.toggle-button-up").first
+    left_button.click()
+    expect(page.locator(".split-panel").first).to_have_css(attr, "300px")
+
+    # Collapse right panel -- right can collapse to minimum, which is 5px (default collapsed size)
+    right_button = page.locator(".toggle-button-right,.toggle-button-down").first
+    right_button.click()
+    # The right panel should be collapsed to zero
+    expect(page.locator(".split-panel").last).to_have_css(attr, "0px")
+
+    # The left panel still stays at its min_size
+    expect(page.locator(".split-panel").first).to_have_css(attr, "592px")
 
 
 def test_split_sizes(page):
@@ -64,13 +128,13 @@ def test_split_collapsed_programmatically(page):
     split.collapsed = 0
     expect(page.locator('.split-panel').first).to_have_attribute('style', 'width: calc(1% - 4px);')
     expect(page.locator('.split-panel').last).to_have_attribute('style', 'width: calc(99% - 4px);')
-    wait_until(lambda: split.sizes == (0, 100), page)
+    wait_until(lambda: split.sizes == (1, 99), page)
     wait_until(lambda: split.collapsed == 0, page)
 
     split.collapsed = 1
     expect(page.locator('.split-panel').first).to_have_attribute('style', 'width: calc(99% - 4px);')
     expect(page.locator('.split-panel').last).to_have_attribute('style', 'width: calc(1% - 4px);')
-    wait_until(lambda: split.sizes == (100, 0), page)
+    wait_until(lambda: split.sizes == (99, 1), page)
     wait_until(lambda: split.collapsed == 1, page)
 
     split.collapsed = None
@@ -104,7 +168,7 @@ def test_split_click_toggle_button(page, orientation):
     page.locator(f'.toggle-button-{btn1}').click()
     expect(page.locator('.split-panel').first).to_have_attribute('style', f'{attr}: calc(1% - 4px);')
     expect(page.locator('.split-panel').last).to_have_attribute('style', f'{attr}: calc(99% - 4px);')
-    wait_until(lambda: split.sizes == (0, 100), page)
+    wait_until(lambda: split.sizes == (1, 99), page)
     wait_until(lambda: split.collapsed == 0, page)
 
     page.locator(f'.toggle-button-{btn2}').click()
@@ -116,7 +180,7 @@ def test_split_click_toggle_button(page, orientation):
     page.locator(f'.toggle-button-{btn2}').click()
     expect(page.locator('.split-panel').first).to_have_attribute('style', f'{attr}: calc(99% - 4px);')
     expect(page.locator('.split-panel').last).to_have_attribute('style', f'{attr}: calc(1% - 4px);')
-    wait_until(lambda: split.sizes == (100, 0), page)
+    wait_until(lambda: split.sizes == (99, 1), page)
     wait_until(lambda: split.collapsed == 1, page)
 
 

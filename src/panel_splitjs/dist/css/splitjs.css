@@ -39,10 +39,6 @@
   width: 100%;
 }
 
-/* Ensure buttons stay visible even when panels are collapsed */
-.split.single-split > div:first-child {
-  min-width: 0 !important; /* Override any minimum width */
-}
 
 .split.single-split > div:nth-child(2) {
   overflow: visible !important; /* Ensure buttons remain visible */
