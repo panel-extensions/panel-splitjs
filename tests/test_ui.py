@@ -128,13 +128,13 @@ def test_split_collapsed_programmatically(page):
     split.collapsed = 0
     expect(page.locator('.split-panel').first).to_have_attribute('style', 'width: calc(1% - 4px);')
     expect(page.locator('.split-panel').last).to_have_attribute('style', 'width: calc(99% - 4px);')
-    wait_until(lambda: split.sizes == (0, 100), page)
+    wait_until(lambda: split.sizes == (1, 99), page)
     wait_until(lambda: split.collapsed == 0, page)
 
     split.collapsed = 1
     expect(page.locator('.split-panel').first).to_have_attribute('style', 'width: calc(99% - 4px);')
     expect(page.locator('.split-panel').last).to_have_attribute('style', 'width: calc(1% - 4px);')
-    wait_until(lambda: split.sizes == (100, 0), page)
+    wait_until(lambda: split.sizes == (99, 1), page)
     wait_until(lambda: split.collapsed == 1, page)
 
     split.collapsed = None
@@ -168,7 +168,7 @@ def test_split_click_toggle_button(page, orientation):
     page.locator(f'.toggle-button-{btn1}').click()
     expect(page.locator('.split-panel').first).to_have_attribute('style', f'{attr}: calc(1% - 4px);')
     expect(page.locator('.split-panel').last).to_have_attribute('style', f'{attr}: calc(99% - 4px);')
-    wait_until(lambda: split.sizes == (0, 100), page)
+    wait_until(lambda: split.sizes == (1, 99), page)
     wait_until(lambda: split.collapsed == 0, page)
 
     page.locator(f'.toggle-button-{btn2}').click()
@@ -180,7 +180,7 @@ def test_split_click_toggle_button(page, orientation):
     page.locator(f'.toggle-button-{btn2}').click()
     expect(page.locator('.split-panel').first).to_have_attribute('style', f'{attr}: calc(99% - 4px);')
     expect(page.locator('.split-panel').last).to_have_attribute('style', f'{attr}: calc(1% - 4px);')
-    wait_until(lambda: split.sizes == (100, 0), page)
+    wait_until(lambda: split.sizes == (99, 1), page)
     wait_until(lambda: split.collapsed == 1, page)
 
 

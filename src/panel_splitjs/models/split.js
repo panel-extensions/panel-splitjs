@@ -164,7 +164,7 @@ export function render({ model, el }) {
       split_instance.setSizes([ls, rs])
       sizes = [ls, rs]
       window.dispatchEvent(new Event('resize'))
-      model.sizes = split_instance.getSizes()
+      requestAnimationFrame(() => { model.sizes = split_instance.getSizes() })
     }
   }
 
@@ -173,7 +173,7 @@ export function render({ model, el }) {
       return
     }
     sizes = model.sizes
-    model.collapsed = sizes[0] === 0 ? 0 : sizes[1] == 0 ? 1 : null
+    model.collapsed = (1-sizes[0]) >= 0 ? 0 : (1-sizes[1]) >= 0 ? 1 : null
     sync_ui(sizes, true)
   })
 
