@@ -125,8 +125,8 @@ pn.extension()
 
 # Create a simple split layout
 split = Split(
-    pn.pane.Markdown("## Left Panel\nContent here", width=150, margin=(10,25,10,10)),
-    pn.pane.Markdown("## Right Panel\nMore content", width=150, margin=(10,10,10,25)),
+    pn.pane.Markdown("## Left Panel\nContent here", width=150),
+    pn.pane.Markdown("## Right Panel\nMore content", width=150),
     sizes=(50, 50),  # Equal sizing initially
     min_size=150,     # Minimum 150px for each panel
     show_buttons=True,
@@ -135,8 +135,6 @@ split = Split(
 
 split.servable()
 ```
-
-Note: We add `margin` to the `Markdown` panes to not overlay the buttons onto them.
 
 ![Show Buttons Example](docs/assets/images/show-buttons.png)
 
@@ -168,7 +166,7 @@ button.on_click(toggle)
 split.servable()
 ```
 
-![Collapsible Sidebar Example](docs/assets/images/Collapsible-sidebar.gif)
+![Collapsible Sidebar Example](docs/assets/images/collapsable-sidebar.gif)
 
 ### Multi-Panel Split
 
@@ -297,7 +295,7 @@ split = Split(
 split.servable()
 ```
 
-![Dashboard with Collapsible Controls](docs/assets/images/dashboard-with-Collapsible-controls.png)
+![Dashboard with Collapsible Controls](docs/assets/images/dashboard-with-collapsable-controls.png)
 
 ### Responsive Layout with Size Constraints
 
