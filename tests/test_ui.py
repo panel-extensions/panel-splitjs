@@ -26,6 +26,15 @@ def test_split(page, orientation):
     expect(page.locator('.split-panel').first).to_have_attribute('style', f'{attr}: calc(50% - 4px);')
     expect(page.locator('.split-panel').last).to_have_attribute('style', f'{attr}: calc(50% - 4px);')
 
+def test_split_replace_panel(page):
+    split = Split(Markdown("LEFT"), Markdown("RIGHT"))
+    serve_component(page, split)
+
+    expect(page.locator(".markdown").first).to_have_text("LEFT")
+    expect(page.locator(".markdown").last).to_have_text("RIGHT")
+
+    split[0] = Markdown("CHANGED LEFT")
+    expect(page.locator(".markdown").first).to_have_text("CHANGED LEFT")
 
 @pytest.mark.parametrize('orientation', ['horizontal', 'vertical'])
 def test_split_min_size_and_total_width(page, orientation):
@@ -200,3 +209,30 @@ def test_multi_split(page, orientation):
     expect(page.locator('.split-panel').first).to_have_attribute('style', f'{attr}: calc(33.3333% - 4px);')
     expect(page.locator('.split-panel').nth(1)).to_have_attribute('style', f'{attr}: calc(33.3333% - 8px);')
     expect(page.locator('.split-panel').last).to_have_attribute('style', f'{attr}: calc(33.3333% - 4px);')
+
+def test_multi_split_replace_panel(page):
+    split = MultiSplit(Markdown("LEFT"), Markdown("MIDDLE"), Markdown("RIGHT"))
+    serve_component(page, split)
+
+    expect(page.locator(".markdown").first).to_have_text("LEFT")
+    expect(page.locator(".markdown").nth(1)).to_have_text("MIDDLE")
+    expect(page.locator(".markdown").last).to_have_text("RIGHT")
+
+    split[0] = Markdown("CHANGED LEFT")
+    expect(page.locator(".markdown").first).to_have_text("CHANGED LEFT")
+    expect(page.locator(".markdown").nth(1)).to_have_text("MIDDLE")
+    expect(page.locator(".markdown").last).to_have_text("RIGHT")
+
+def test_multi_split_append_panel(page):
+    split = MultiSplit(Markdown("LEFT"), Markdown("MIDDLE"), Markdown("RIGHT"))
+    serve_component(page, split)
+
+    expect(page.locator(".markdown").first).to_have_text("LEFT")
+    expect(page.locator(".markdown").nth(1)).to_have_text("MIDDLE")
+    expect(page.locator(".markdown").last).to_have_text("RIGHT")
+
+    split.append(Markdown("NEW"))
+    expect(page.locator(".markdown").first).to_have_text("LEFT")
+    expect(page.locator(".markdown").nth(1)).to_have_text("MIDDLE")
+    expect(page.locator(".markdown").nth(2)).to_have_text("RIGHT")
+    expect(page.locator(".markdown").last).to_have_text("NEW")
