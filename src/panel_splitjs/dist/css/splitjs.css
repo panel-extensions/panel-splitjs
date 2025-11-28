@@ -14,15 +14,15 @@
 }
 
 /* Padding for panel edges unless collapsed */
-.single-split.horizontal > div:nth-child(1) { padding-right: 15px; }
-.single-split.horizontal > div:nth-child(1):has(.collapsed-content) { padding-right: 0 !important; }
-.single-split.horizontal > div:nth-child(3) { padding-left: 15px; }
-.single-split.horizontal > div:nth-child(3):has(.collapsed-content) { padding-left: 0 !important; }
+.single-split.horizontal.expand-buttons > div:nth-child(1) { padding-right: 15px; }
+.single-split.horizontal > div:nth-child(1):has(.collapsed-content) { padding-right: 0; }
+.single-split.horizontal.expand-buttons > div:nth-child(3) { padding-left: 15px; }
+.single-split.horizontal > div:nth-child(3):has(.collapsed-content) { padding-left: 0; }
 
-.single-split.vertical > div:nth-child(1) { padding-bottom: 15px; }
-.single-split.vertical > div:nth-child(1):has(.collapsed-content) { padding-bottom: 0 !important; }
-.single-split.vertical > div:nth-child(3) { padding-top: 15px; }
-.single-split.vertical > div:nth-child(3):has(.collapsed-content) { padding-top: 0 !important; }
+.single-split.vertical.expand-buttons > div:nth-child(1) { padding-bottom: 15px; }
+.single-split.vertical > div:nth-child(1):has(.collapsed-content) { padding-bottom: 0; }
+.single-split.vertical.expand-buttons > div:nth-child(3) { padding-top: 15px; }
+.single-split.vertical > div:nth-child(3):has(.collapsed-content) { padding-top: 0; }
 
 /* Style for initial load to prevent FOUC */
 .loading {
@@ -32,16 +32,6 @@
 /* Split panel styles (combine .split > div rules) */
 .split > div {
   position: relative;
-}
-
-/* Only need this one block for child2 (remove duplicate) */
-.split.single-split > div:nth-child(1) {
-  overflow: clip;
-}
-.split.single-split > div:nth-child(3) {
-  overflow: visible !important; /* Ensure buttons remain visible */
-  position: relative !important;
-  width: 100%;
 }
 
 /* Content wrapper styles */
@@ -161,14 +151,15 @@
 .gutter > .divider {
   --gap: 40px;
   --thickness: 1px;
-  --color: var(--border-color);
+  --color: var(--panel-border-color);
   background: var(--color);
   position: absolute;
 }
 /* Horizontal variant for divider */
 .gutter-vertical > .divider {
   top: 50%;
-  width: 100%;
+  left: 2.5%;
+  width: 95%;
   height: var(--thickness);
   background:
     linear-gradient(to right,
@@ -182,7 +173,8 @@
 /* Vertical variant for divider */
 .gutter-horizontal > .divider {
   left: 50%;
-  height: 100%;
+  top: 2.5%;
+  height: 95%;
   width: var(--thickness);
   background:
     linear-gradient(to bottom,

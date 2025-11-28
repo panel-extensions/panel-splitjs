@@ -39,6 +39,9 @@ class Size(param.Parameter):
 
 class SplitBase(JSComponent, ListLike):
 
+    gutter_size = param.Integer(default=8, doc="""
+        Width of the gutter element.""")
+
     max_size = Size(default=None, doc="""
         The maximum sizes of the panels (in pixels) either as a single value or a tuple.""")
 
