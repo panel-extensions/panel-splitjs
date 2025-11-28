@@ -41,11 +41,10 @@ pn.extension()
 
 # Create a simple split layout
 split = Split(
-    pn.pane.Markdown("## Left Panel\nContent here", width=150, margin=25),
-    pn.pane.Markdown("## Right Panel\nMore content", width=150, margin=25),
+    pn.pane.Markdown("## Left Panel\nContent here", width=150),
+    pn.pane.Markdown("## Right Panel\nMore content", width=150),
     sizes=(50, 50),  # Equal sizing initially
     min_size=150,     # Minimum 150px for each panel
-    show_buttons=True, # Show collapse/expand buttons on the divider
     sizing_mode="stretch_both",
 )
 
@@ -99,23 +98,47 @@ from panel_splitjs import VSplit
 
 pn.extension()
 
-top_panel = pn.pane.Markdown("## Top Section\nHeader content", margin=(10,10,25,10))
-bottom_panel = pn.pane.Markdown("## Bottom Section\nFooter content", margin=(25,10,10,10))
+top_panel = pn.pane.Markdown("## Top Section\nHeader content")
+bottom_panel = pn.pane.Markdown("## Bottom Section\nFooter content")
 
 split = VSplit(
     top_panel,
     bottom_panel,
-    sizes=(60, 40),
-    min_size=150,
-    height=500,
-    width=300,
-    styles={"border": "1px solid gray"}
+    sizes=(70, 30),
+    min_size=200,
+    height=600,
+    sizing_mode="stretch_width"
 )
 
 split.servable()
 ```
 
 ![Basic Vertical Split Example](docs/assets/images/basic-vertical-split.png)
+
+### Show Buttons
+
+```python
+import panel as pn
+from panel_splitjs import Split
+
+pn.extension()
+
+# Create a simple split layout
+split = Split(
+    pn.pane.Markdown("## Left Panel\nContent here", width=150, margin=(10,25,10,10)),
+    pn.pane.Markdown("## Right Panel\nMore content", width=150, margin=(10,10,10,25)),
+    sizes=(50, 50),  # Equal sizing initially
+    min_size=150,     # Minimum 150px for each panel
+    show_buttons=True,
+    sizing_mode="stretch_both",
+)
+
+split.servable()
+```
+
+Note: We add `margin` to the `Markdown` panes to not overlay the buttons onto them.
+
+![Show Buttons Example](docs/assets/images/show-buttons.png)
 
 ### Collapsible Sidebar
 
@@ -133,7 +156,6 @@ split = Split(
     pn.pane.Markdown("## Collapsible Sidebar", margin=(10,10,10,25)),
     collapsed=1,  # 0 for first panel, 1 for second panel, None for not collapsed
     expanded_sizes=(80, 20),  # When expanded, 80% main, 20% sidebar
-    show_buttons=False,
     sizing_mode="stretch_both",
 )
 
@@ -146,7 +168,7 @@ button.on_click(toggle)
 split.servable()
 ```
 
-![Collapsable Sidebar Example](docs/assets/images/collapsable-sidebar.gif)
+![Collapsible Sidebar Example](docs/assets/images/Collapsible-sidebar.gif)
 
 ### Multi-Panel Split
 
@@ -186,7 +208,7 @@ The main split panel component for creating two-panel layouts with collapsible f
 - `max_size` (int | tuple, default=None): Maximum sizes in pixels - single value applies to both panels, tuple for individual sizes
 - `min_size` (int | tuple, default=0): Minimum sizes in pixels - single value applies to both panels, tuple for individual sizes
 - `orientation` (str, default="horizontal"): Either `"horizontal"` or `"vertical"`
-- `show_buttons` (bool, default=True): Show collapse/expand toggle buttons on the divider
+- `show_buttons` (bool, default=False): Show collapse/expand toggle buttons on the divider
 - `sizes` (tuple, default=(50, 50)): Initial percentage sizes of the panels
 - `snap_size` (int, default=30): Snap to minimum size at this offset in pixels
 - `step_size` (int, default=1): Step size in pixels at which panel sizes can be changed
@@ -236,7 +258,6 @@ split = Split(
     output,
     collapsed=None,  # Both panels visible
     expanded_sizes=(50, 50),
-    show_buttons=True,
     min_size=(600, 300),  # Minimum 300px for each panel
     sizing_mode="stretch_both",
 )
@@ -276,7 +297,7 @@ split = Split(
 split.servable()
 ```
 
-![Dashboard with Collapsable Controls](docs/assets/images/dashboard-with-collapsable-controls.png)
+![Dashboard with Collapsible Controls](docs/assets/images/dashboard-with-Collapsible-controls.png)
 
 ### Responsive Layout with Size Constraints
 
@@ -300,7 +321,7 @@ split = Split(
 split.servable()
 ```
 
-![Responsibe Layout with Size Constraints](docs/assets/images/responsive-layout-with-size-constraints.png)
+![Responsive Layout with Size Constraints](docs/assets/images/responsive-layout-with-size-constraints.png)
 
 ### Complex Multi-Panel Layout
 
@@ -346,9 +367,9 @@ left = pn.pane.Markdown("## Left Panel")
 
 # Right side has a vertical split
 with pn.config.set(sizing_mode="stretch_both"):
-    top_right = pn.pane.Markdown("## Top Right", margin=(5,25,5,5))
-    bottom_right = pn.pane.Markdown("## Bottom Right", margin=(25,25,5,5))
-    right = VSplit(top_right, bottom_right, sizes=(60, 40), margin=(5,5,25,25))
+    top_right = pn.pane.Markdown("## Top Right")
+    bottom_right = pn.pane.Markdown("## Bottom Right")
+    right = VSplit(top_right, bottom_right, sizes=(60, 40))
 
     # Main horizontal split
     layout = HSplit(
@@ -389,6 +410,15 @@ pixi run build
 
 ```bash
 pixi run test
+```
+
+### Pre-commit
+
+Before committing the first time please install `pre-commit`:
+
+```bash
+pip install pre-commit
+pre-commit install
 ```
 
 ## Contributing
