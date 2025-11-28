@@ -41,15 +41,17 @@ pn.extension()
 
 # Create a simple split layout
 split = Split(
-    pn.pane.Markdown("## Left Panel\nContent here"),
-    pn.pane.Markdown("## Right Panel\nMore content"),
+    pn.pane.Markdown("## Left Panel\nContent here", width=150),
+    pn.pane.Markdown("## Right Panel\nMore content", width=150),
     sizes=(50, 50),  # Equal sizing initially
-    min_size=100,     # Minimum 100px for each panel
-    show_buttons=True
+    min_size=150,     # Minimum 150px for each panel
+    sizing_mode="stretch_both",
 )
 
 split.servable()
 ```
+
+![Quick Start Example](docs/assets/images/quick-start.gif)
 
 ## Usage Examples
 
@@ -59,29 +61,34 @@ split.servable()
 import panel as pn
 from panel_splitjs import HSplit
 
-pn.extension()
+pn.extension(sizing_mode="stretch_width")
 
 left_panel = pn.Column(
     "# Main Content",
     pn.widgets.TextInput(name="Input"),
-    pn.pane.Markdown("This is the main content area.")
+    pn.pane.Markdown("This is the main content area."),
+    margin=25, # To separate toggle button and column
 )
 
 right_panel = pn.Column(
     "# Sidebar",
     pn.widgets.Select(name="Options", options=["A", "B", "C"]),
+    margin=25, # To separate toggle button and column
 )
 
 split = HSplit(
     left_panel,
     right_panel,
     sizes=(70, 30),  # 70% left, 30% right
-    min_size=200,    # Minimum 200px for each panel
-    show_buttons=True
+    min_size=300,    # Minimum 300px for each panel
+    sizing_mode="stretch_width",
+    height=250,
 )
 
 split.servable()
 ```
+
+![Basic Horizontal Split Example](docs/assets/images/basic-horizontal-split.png)
 
 ### Vertical Split
 
@@ -97,12 +104,41 @@ bottom_panel = pn.pane.Markdown("## Bottom Section\nFooter content")
 split = VSplit(
     top_panel,
     bottom_panel,
-    sizes=(60, 40),
-    min_size=150
+    sizes=(70, 30),
+    min_size=200,
+    height=600,
+    sizing_mode="stretch_width"
 )
 
 split.servable()
 ```
+
+![Basic Vertical Split Example](docs/assets/images/basic-vertical-split.png)
+
+### Show Buttons
+
+```python
+import panel as pn
+from panel_splitjs import Split
+
+pn.extension()
+
+# Create a simple split layout
+split = Split(
+    pn.pane.Markdown("## Left Panel\nContent here", width=150, margin=(10,25,10,10)),
+    pn.pane.Markdown("## Right Panel\nMore content", width=150, margin=(10,10,10,25)),
+    sizes=(50, 50),  # Equal sizing initially
+    min_size=150,     # Minimum 150px for each panel
+    show_buttons=True,
+    sizing_mode="stretch_both",
+)
+
+split.servable()
+```
+
+Note: We add `margin` to the `Markdown` panes to not overlay the buttons onto them.
+
+![Show Buttons Example](docs/assets/images/show-buttons.png)
 
 ### Collapsible Sidebar
 
@@ -113,23 +149,26 @@ from panel_splitjs import Split
 pn.extension()
 
 # Start with right panel collapsed
+button = pn.widgets.Button(name="Toggle Sidebar")
+
 split = Split(
-    pn.pane.Markdown("## Main Content"),
-    pn.pane.Markdown("## Collapsible Sidebar"),
+    pn.Column(pn.pane.Markdown("## Main Content"), button),
+    pn.pane.Markdown("## Collapsible Sidebar", margin=(10,10,10,25)),
     collapsed=1,  # 0 for first panel, 1 for second panel, None for not collapsed
-    expanded_sizes=(65, 35),  # When expanded, 65% main, 35% sidebar
-    show_buttons=True,
-    min_size=(200, 200)  # Minimum 200px for each panel
+    expanded_sizes=(80, 20),  # When expanded, 80% main, 20% sidebar
+    sizing_mode="stretch_both",
 )
 
 # Toggle collapse programmatically
-button = pn.widgets.Button(name="Toggle Sidebar")
+
 def toggle(event):
     split.collapsed = None if split.collapsed == 1 else 1
 button.on_click(toggle)
 
-pn.Column(button, split).servable()
+split.servable()
 ```
+
+![Collapsible Sidebar Example](docs/assets/images/Collapsible-sidebar.gif)
 
 ### Multi-Panel Split
 
@@ -146,11 +185,14 @@ multi = MultiSplit(
     pn.pane.Markdown("## Panel 3"),
     sizes=(30, 40, 30),  # Three panels with custom sizing
     min_size=100,        # Minimum 100px for each panel
-    orientation="horizontal"
+    orientation="horizontal",
+    sizing_mode="stretch_both",
 )
 
 multi.servable()
 ```
+
+![MultiSplit Example](docs/assets/images/multisplit.png)
 
 ## API Reference
 
@@ -166,7 +208,7 @@ The main split panel component for creating two-panel layouts with collapsible f
 - `max_size` (int | tuple, default=None): Maximum sizes in pixels - single value applies to both panels, tuple for individual sizes
 - `min_size` (int | tuple, default=0): Minimum sizes in pixels - single value applies to both panels, tuple for individual sizes
 - `orientation` (str, default="horizontal"): Either `"horizontal"` or `"vertical"`
-- `show_buttons` (bool, default=True): Show collapse/expand toggle buttons on the divider
+- `show_buttons` (bool, default=False): Show collapse/expand toggle buttons on the divider
 - `sizes` (tuple, default=(50, 50)): Initial percentage sizes of the panels
 - `snap_size` (int, default=30): Snap to minimum size at this offset in pixels
 - `step_size` (int, default=1): Step size in pixels at which panel sizes can be changed
@@ -207,20 +249,23 @@ from panel_splitjs import Split
 
 pn.extension()
 
-chat = pn.chat.ChatInterface()
-output = pn.Column("# Output Area")
+with pn.config.set(sizing_mode="stretch_width"):
+    chat = pn.chat.ChatInterface(margin=(5,25,5,5))
+    output = pn.Column("# Output Area")
 
 split = Split(
     chat,
     output,
     collapsed=None,  # Both panels visible
     expanded_sizes=(50, 50),
-    show_buttons=True,
-    min_size=(300, 300)  # Minimum 300px for each panel
+    min_size=(600, 300),  # Minimum 600px for the first panel, 300px for the second panel
+    sizing_mode="stretch_both",
 )
 
 split.servable()
 ```
+
+![Chat Example](docs/assets/images/chat-example.png)
 
 ### Dashboard with Collapsible Controls
 
@@ -230,25 +275,29 @@ from panel_splitjs import Split
 
 pn.extension()
 
-controls = pn.Column(
-    pn.widgets.Select(name="Dataset", options=["A", "B", "C"]),
-    pn.widgets.IntSlider(name="Threshold", start=0, end=100),
-    pn.widgets.Button(name="Update")
-)
+with pn.config.set(sizing_mode="stretch_width"):
+    controls = pn.Column(
+        pn.widgets.Select(name="Dataset", options=["A", "B", "C"]),
+        pn.widgets.IntSlider(name="Threshold", start=0, end=100),
+        pn.widgets.Button(name="Update"),
+        margin=(5,20,5,5),
+    )
 
-visualization = pn.pane.Markdown("## Main Visualization Area")
+    visualization = pn.pane.Markdown("## Main Visualization Area")
 
 split = Split(
     controls,
     visualization,
-    collapsed=0,  # Start with controls collapsed
-    expanded_sizes=(25, 75),
+    sizes=(20, 80),
+    min_size=(300, 0),
     show_buttons=True,
-    min_size=(250, 400)  # Minimum sizes for each panel
+    sizing_mode="stretch_both",
 )
 
 split.servable()
 ```
+
+![Dashboard with Collapsible Controls](docs/assets/images/dashboard-with-Collapsible-controls.png)
 
 ### Responsive Layout with Size Constraints
 
@@ -259,17 +308,20 @@ from panel_splitjs import Split
 pn.extension()
 
 split = Split(
-    pn.pane.Markdown("## Panel 1\nResponsive content"),
-    pn.pane.Markdown("## Panel 2\nMore responsive content"),
+    pn.pane.Markdown("## Panel 1\nResponsive content", sizing_mode="stretch_width", margin=(5,25,5,5)),
+    pn.pane.Markdown("## Panel 2\nMore responsive content", sizing_mode="stretch_width", margin=(5,5,5,25)),
     sizes=(50, 50),
     min_size=200,        # Minimum 200px per panel
     max_size=800,        # Maximum 800px per panel
     snap_size=50,        # Snap to min size when within 50px
-    show_buttons=True
+    show_buttons=True,
+    sizing_mode="stretch_both",
 )
 
 split.servable()
 ```
+
+![Responsive Layout with Size Constraints](docs/assets/images/responsive-layout-with-size-constraints.png)
 
 ### Complex Multi-Panel Layout
 
@@ -280,10 +332,11 @@ from panel_splitjs import MultiSplit
 pn.extension()
 
 # Create a four-panel layout
-sidebar = pn.Column("## Sidebar", pn.widgets.Select(options=["A", "B", "C"]))
-main = pn.pane.Markdown("## Main Content Area")
-detail = pn.pane.Markdown("## Detail Panel")
-console = pn.pane.Markdown("## Console Output")
+with pn.config.set(sizing_mode="stretch_width"):
+    sidebar = pn.Column("## Sidebar", pn.widgets.Select(options=["A", "B", "C"]))
+    main = pn.pane.Markdown("## Main Content Area")
+    detail = pn.pane.Markdown("## Detail Panel")
+    console = pn.pane.Markdown("## Console Output")
 
 multi = MultiSplit(
     sidebar,
@@ -292,11 +345,14 @@ multi = MultiSplit(
     console,
     sizes=(15, 40, 25, 20),  # Custom sizing for each panel
     min_size=(150, 300, 200, 150),  # Individual minimums
-    orientation="horizontal"
+    orientation="horizontal",
+    sizing_mode="stretch_both",
 )
 
 multi.servable()
 ```
+
+![Complex Multi-Panel Layout](docs/assets/images/complex-multi-panel-layout.png)
 
 ### Nested Splits
 
@@ -310,20 +366,24 @@ pn.extension()
 left = pn.pane.Markdown("## Left Panel")
 
 # Right side has a vertical split
-top_right = pn.pane.Markdown("## Top Right")
-bottom_right = pn.pane.Markdown("## Bottom Right")
-right = VSplit(top_right, bottom_right, sizes=(60, 40))
+with pn.config.set(sizing_mode="stretch_both"):
+    top_right = pn.pane.Markdown("## Top Right")
+    bottom_right = pn.pane.Markdown("## Bottom Right")
+    right = VSplit(top_right, bottom_right, sizes=(60, 40))
 
-# Main horizontal split
-layout = HSplit(
-    left,
-    right,
-    sizes=(30, 70),
-    min_size=200
-)
+    # Main horizontal split
+    layout = HSplit(
+        left,
+        right,
+        sizes=(30, 70),
+        min_size=200,
+        sizing_mode="stretch_both",
+    )
 
 layout.servable()
 ```
+
+![Nested Splits](docs/assets/images/nested-splits.png)
 
 ## Development
 
@@ -350,6 +410,15 @@ pixi run build
 
 ```bash
 pixi run test
+```
+
+### Pre-commit
+
+Before committing the first time please install `pre-commit`:
+
+```bash
+pip install pre-commit
+pre-commit install
 ```
 
 ## Contributing
