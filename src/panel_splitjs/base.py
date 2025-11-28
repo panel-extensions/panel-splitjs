@@ -109,7 +109,7 @@ class Split(SplitBase):
         The component to place in the left panel.
         When invert=True, this will appear on the right side.""")
 
-    show_buttons = param.Boolean(default=True, doc="""
+    show_buttons = param.Boolean(default=False, doc="""
         Whether to show the toggle buttons on the divider.
         When False, the buttons are hidden and panels can only be resized by dragging.""")
 
