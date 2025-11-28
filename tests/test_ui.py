@@ -157,7 +157,7 @@ def test_split_sizes_programmatically(page):
 @pytest.mark.parametrize('orientation', ['horizontal', 'vertical'])
 def test_split_click_toggle_button(page, orientation):
     kwargs = {'width': 400} if orientation == 'horizontal' else {'height': 400}
-    split = Split(Button(name='Left'), Button(name='Right'), orientation=orientation, **kwargs)
+    split = Split(Button(name='Left'), Button(name='Right'), orientation=orientation, show_buttons=True, **kwargs)
     serve_component(page, split)
 
     btn1, btn2 = ("left", "right") if orientation == "horizontal" else ("up", "down")
