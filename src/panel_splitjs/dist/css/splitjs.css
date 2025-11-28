@@ -13,36 +13,25 @@
   flex-direction: column;
 }
 
+/* Padding for panel edges unless collapsed */
+.single-split.horizontal.expand-buttons > div:nth-child(1) { padding-right: 15px; }
+.single-split.horizontal > div:nth-child(1):has(.collapsed-content) { padding-right: 0; }
+.single-split.horizontal.expand-buttons > div:nth-child(3) { padding-left: 15px; }
+.single-split.horizontal > div:nth-child(3):has(.collapsed-content) { padding-left: 0; }
+
+.single-split.vertical.expand-buttons > div:nth-child(1) { padding-bottom: 15px; }
+.single-split.vertical > div:nth-child(1):has(.collapsed-content) { padding-bottom: 0; }
+.single-split.vertical.expand-buttons > div:nth-child(3) { padding-top: 15px; }
+.single-split.vertical > div:nth-child(3):has(.collapsed-content) { padding-top: 0; }
+
 /* Style for initial load to prevent FOUC */
 .loading {
   visibility: hidden;
 }
 
-/* Max width for comfortable reading */
-.left-panel-content {
-  max-width: clamp(450px, 95vw, 1200px);
-  margin: 0px auto;
-}
-
-/* Split panel styles */
+/* Split panel styles (combine .split > div rules) */
 .split > div {
   position: relative;
-}
-
-.split.single-split > div:nth-child(1) {
-  overflow: clip;
-}
-
-.split.single-split > div:nth-child(2) {
-  overflow: visible;
-  position: relative;
-  width: 100%;
-}
-
-
-.split.single-split > div:nth-child(2) {
-  overflow: visible !important; /* Ensure buttons remain visible */
-  position: relative !important;
 }
 
 /* Content wrapper styles */
@@ -54,7 +43,7 @@
   padding-inline: 0.5rem;
 }
 
-/* Toggle button basic styles */
+/* Toggle button base styles (deduplicated, combine base and arrow masks) */
 .toggle-button-left, .toggle-button-right, .toggle-button-up, .toggle-button-down {
   position: absolute;
   width: 24px;
@@ -68,34 +57,47 @@
   transition: opacity 0.2s;
   border-radius: 4px;
   padding: 2px;
+
+  background-color: var(--panel-on-background-color);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: 16px;
+  mask-size: 16px;
 }
 
-/* Left button (<) - positioned on left side of divider */
 .toggle-button-left {
-  left: -34px; /* 24px width + 10px spacing from divider */
+  left: -28px;
   top: 50%;
   transform: translateY(-50%);
+  -webkit-mask-image: url("arrow_left.svg");
+  mask-image: url("arrow_left.svg");
 }
-
-/* Right button (>) - positioned on right side of divider */
 .toggle-button-right {
-  left: 2px;
+  left: -4px;
   top: 50%;
   transform: translateY(-50%);
+  -webkit-mask-image: url("arrow_right.svg");
+  mask-image: url("arrow_right.svg");
 }
-
-/* Up button (^) - positioned above divider */
 .toggle-button-up {
-  top: -34px; /* 24px height + 10px spacing from divider */
+  top: -28px;
   left: 50%;
   transform: translateX(-50%);
+  -webkit-mask-image: url("arrow_up.svg");
+  mask-image: url("arrow_up.svg");
+}
+.toggle-button-down {
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  -webkit-mask-image: url("arrow_down.svg");
+  mask-image: url("arrow_down.svg");
 }
 
-/* Down button (v) - positioned below divider */
-.toggle-button-down {
-  top: 2px;
-  left: 50%;
-  transform: translateX(-50%);
+.toggle-button-left:hover, .toggle-button-right:hover, .toggle-button-up:hover, .toggle-button-down:hover {
+  opacity: 1;
 }
 
 /* Collapsed state */
@@ -109,23 +111,19 @@
   background-repeat: no-repeat;
   background-position: 50%;
   transition: background-color 0.2s;
+  z-index: 999;
 }
-
 .gutter:hover {
   background-color: var(--panel-surface-color);
 }
-
 .gutter.gutter-horizontal {
   cursor: col-resize;
   position: relative;
   width: 10px;
-  z-index: 1;
 }
-
 .gutter.gutter-vertical {
   cursor: row-resize;
 }
-
 .gutter::after {
   content: "";
   position: absolute;
@@ -138,13 +136,11 @@
   mask-repeat: no-repeat;
   background-color: var(--panel-border-color);
 }
-
 .gutter.gutter-horizontal::after {
   width: 10px;
   height: 24px;
   cursor: col-resize;
 }
-
 .gutter.gutter-vertical::after {
   width: 24px;
   height: 10px;
@@ -152,19 +148,18 @@
   mask-image: url("handle_vertical.svg");
   cursor: row-resize;
 }
-
 .gutter > .divider {
   --gap: 40px;
   --thickness: 1px;
-  --color: var(--border-color);
+  --color: var(--panel-border-color);
   background: var(--color);
   position: absolute;
 }
-
-/* Horizontal variant */
+/* Horizontal variant for divider */
 .gutter-vertical > .divider {
   top: 50%;
-  width: 100%;
+  left: 2.5%;
+  width: 95%;
   height: var(--thickness);
   background:
     linear-gradient(to right,
@@ -175,11 +170,11 @@
       var(--color) calc(50% + var(--gap) / 2),
       var(--color) 100%);
 }
-
-/* Vertical variant */
+/* Vertical variant for divider */
 .gutter-horizontal > .divider {
   left: 50%;
-  height: 100%;
+  top: 2.5%;
+  height: 95%;
   width: var(--thickness);
   background:
     linear-gradient(to bottom,
@@ -191,73 +186,25 @@
       var(--color) 100%);
 }
 
-/* Toggle button base styles */
-.toggle-button-left,
-.toggle-button-right,
-.toggle-button-up,
-.toggle-button-down {
-  width: 24px;
-  height: 24px;
-  background-color: var(--panel-on-background-color);
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-  -webkit-mask-size: 16px;
-  mask-size: 16px;
-  opacity: 0.5;
-}
-
-.toggle-button-left:hover, .toggle-button-right:hover, .toggle-button-up:hover, .toggle-button-down:hover {
-  opacity: 1;
-}
-
-/* Left arrow button */
-.toggle-button-left {
-  -webkit-mask-image: url("arrow_left.svg");
-  mask-image: url("arrow_left.svg");
-}
-
-/* Right arrow button */
-.toggle-button-right {
-  -webkit-mask-image: url("arrow_right.svg");
-  mask-image: url("arrow_right.svg");
-}
-
-/* Up arrow button */
-.toggle-button-up {
-  -webkit-mask-image: url("arrow_up.svg");
-  mask-image: url("arrow_up.svg");
-}
-
-/* Down arrow button */
-.toggle-button-down {
-  -webkit-mask-image: url("arrow_down.svg");
-  mask-image: url("arrow_down.svg");
-}
-
-/* Animation for toggle icon */
+/* Toggle button animation */
 @keyframes jumpLeftRight {
   0%, 100% { transform: translateY(-50%); }
   25% { transform: translate(-4px, -50%); }
   50% { transform: translateY(-50%); }
   75% { transform: translate(4px, -50%); }
 }
-
 @keyframes jumpUpDown {
   0%, 100% { transform: translateX(-50%); }
   25% { transform: translate(-50%, -4px); }
   50% { transform: translateX(-50%); }
   75% { transform: translate(-50%, 4px); }
 }
-
 .toggle-button-left.animated, .toggle-button-right.animated {
   animation-name: jumpLeftRight;
   animation-duration: 0.5s;
   animation-timing-function: ease;
   animation-iteration-count: 3;
 }
-
 .toggle-button-up.animated, .toggle-button-down.animated {
   animation-name: jumpUpDown;
   animation-duration: 0.5s;
