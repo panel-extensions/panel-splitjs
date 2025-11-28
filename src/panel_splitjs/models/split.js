@@ -4,15 +4,19 @@ const COLLAPSED_SIZE = 5
 
 export function render({ model, el }) {
   const split_div = document.createElement("div")
-  split_div.className = `split single-split ${model.orientation}`
+  split_div.className = `split single-split ${model.orientation} `
+  split_div.style.visibility = "hidden"
   split_div.classList.add("loading")
+  if (model.show_buttons) {
+    split_div.classList.add("expand-buttons")
+  }
 
   const [left_min, right_min] = Array.isArray(model.min_size) ? model.min_size : [model.min_size, model.min_size]
 
   if (model.orientation === "horizontal") {
-    split_div.style.minWidth = `${left_min + right_min + 8}px`
+    split_div.style.minWidth = `${left_min + right_min + model.gutter_size}px`
   } else {
-    split_div.style.minHeight = `${left_min + right_min + 8}px`
+    split_div.style.minHeight = `${left_min + right_min + model.gutter_size}px`
   }
 
   const split0 = document.createElement("div")
@@ -116,7 +120,7 @@ export function render({ model, el }) {
     maxSize: model.max_size || Number("Infinity"),
     dragInterval: model.step_size,
     snapOffset: model.snap_size,
-    gutterSize: 8,
+    gutterSize: model.gutter_size,
     gutter: (index, direction) => {
       const gutter = document.createElement('div')
       gutter.className = `gutter gutter-${direction}`
@@ -204,6 +208,7 @@ export function render({ model, el }) {
       }, 1500)
     }
     window.dispatchEvent(new Event('resize'))
+    split_div.style.visibility = ""
     split_div.classList.remove("loading")
   })
 

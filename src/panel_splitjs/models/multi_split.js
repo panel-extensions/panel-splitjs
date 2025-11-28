@@ -3,6 +3,7 @@ import Split from "https://esm.sh/split.js@1.6.5"
 export function render({ model, el }) {
   const split_div = document.createElement("div")
   split_div.className = `split multi-split ${model.orientation}`
+  split_div.style.visibility = "hidden"
   split_div.classList.add("loading")
 
   let split = null
@@ -61,7 +62,7 @@ export function render({ model, el }) {
       maxSize: model.max_size || Number("Infinity"),
       dragInterval: model.step_size || 1,
       snapOffset: model.snap_size || 30,
-      gutterSize: 8,
+      gutterSize: model.gutter_size,
       gutter: (index, direction) => {
         const gutter = document.createElement('div')
         gutter.className = `gutter gutter-${direction}`
@@ -94,6 +95,7 @@ export function render({ model, el }) {
   model.on("after_layout", () => {
     if (!initialized) {
       initialized = true
+      split_div.style.visibility = ""
       split_div.classList.remove("loading")
     }
   })

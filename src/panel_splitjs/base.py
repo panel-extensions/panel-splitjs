@@ -39,6 +39,9 @@ class Size(param.Parameter):
 
 class SplitBase(JSComponent, ListLike):
 
+    gutter_size = param.Integer(default=8, doc="""
+        Width of the gutter element.""")
+
     max_size = Size(default=None, doc="""
         The maximum sizes of the panels (in pixels) either as a single value or a tuple.""")
 
@@ -109,7 +112,7 @@ class Split(SplitBase):
         The component to place in the left panel.
         When invert=True, this will appear on the right side.""")
 
-    show_buttons = param.Boolean(default=True, doc="""
+    show_buttons = param.Boolean(default=False, doc="""
         Whether to show the toggle buttons on the divider.
         When False, the buttons are hidden and panels can only be resized by dragging.""")
 
