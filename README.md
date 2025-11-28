@@ -258,7 +258,7 @@ split = Split(
     output,
     collapsed=None,  # Both panels visible
     expanded_sizes=(50, 50),
-    min_size=(600, 300),  # Minimum 300px for each panel
+    min_size=(600, 300),  # Minimum 600px for the first panel, 300px for the second panel
     sizing_mode="stretch_both",
 )
 
