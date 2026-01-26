@@ -54,8 +54,12 @@ export function render({ model, el }) {
 
   model.on("objects", () => {
     const [left, right] = model.get_child("objects")
-    left_content_wrapper.replaceChildren(left)
-    right_content_wrapper.replaceChildren(right)
+    if (![...left_content_wrapper.children].includes(left)) {
+      left_content_wrapper.replaceChildren(left)
+    }
+    if (![...right_content_wrapper.children].includes(right)) {
+      right_content_wrapper.replaceChildren(right)
+    }
   })
 
   let left_arrow_button, right_arrow_button
