@@ -1,4 +1,4 @@
-[workspace]
+[project]
 name = "panel-splitjs"
 channels = ["pyviz/label/dev", "conda-forge"]
 platforms = ["osx-arm64", "osx-64", "linux-64", "win-64"]
