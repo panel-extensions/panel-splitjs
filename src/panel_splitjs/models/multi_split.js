@@ -7,6 +7,7 @@ export function render({ model, el }) {
   split_div.classList.add("loading")
 
   let split = null
+  let initialized = false
 
   function reconcileChildren(parent, desiredChildren) {
     // Ensure each desired child is at the correct index
@@ -88,15 +89,19 @@ export function render({ model, el }) {
       return
     }
     sizes = model.sizes
-    split.setSizes(sizes)
+    if (initialized && split) {
+      split.setSizes(sizes)
+    }
   })
 
-  let initialized = false
   model.on("after_layout", () => {
     if (!initialized) {
       initialized = true
       split_div.style.visibility = ""
       split_div.classList.remove("loading")
+      if (split) {
+        split.setSizes(sizes)
+      }
     }
   })
 
