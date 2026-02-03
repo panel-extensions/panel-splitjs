@@ -13,6 +13,8 @@ export function render({ model, el }) {
 
   const [left_min, right_min] = Array.isArray(model.min_size) ? model.min_size : [model.min_size, model.min_size]
 
+  let initialized = false
+
   if (model.orientation === "horizontal") {
     split_div.style.minWidth = `${left_min + right_min + model.gutter_size}px`
   } else {
@@ -117,7 +119,7 @@ export function render({ model, el }) {
 
   let is_collapsed = model.collapsed
   let sizes = model.sizes
-  const init_sizes = is_collapsed ? [100, 0] : model.sizes
+  const init_sizes = is_collapsed == null ? model.sizes : (is_collapsed ? [100, 0] : [0, 100])
   const split_instance = Split([split0, split1], {
     sizes: init_sizes,
     minSize: model.min_size,
@@ -168,11 +170,13 @@ export function render({ model, el }) {
     } else {
       left_content_wrapper.className = "content-wrapper"
     }
-    if (resize) {
+    if (resize && initialized) {
       split_instance.setSizes([ls, rs])
       sizes = [ls, rs]
       window.dispatchEvent(new Event('resize'))
       requestAnimationFrame(() => { model.sizes = split_instance.getSizes() })
+    } else if (resize) {
+      sizes = [ls, rs]
     }
   }
 
@@ -182,7 +186,7 @@ export function render({ model, el }) {
     }
     sizes = model.sizes
     model.collapsed = (1-sizes[0]) >= 0 ? 0 : (1-sizes[1]) >= 0 ? 1 : null
-    sync_ui(sizes, true)
+    sync_ui(sizes, initialized)
   })
 
   model.on("collapsed", () => {
@@ -191,10 +195,9 @@ export function render({ model, el }) {
     }
     is_collapsed = model.collapsed
     const new_sizes = is_collapsed === 0 ? [0, 100] : (is_collapsed === 1 ? [100, 0] : model.expanded_sizes)
-    sync_ui(new_sizes, true)
+    sync_ui(new_sizes, initialized)
   })
 
-  let initialized = false
   model.on("after_layout", () => {
     if (initialized) {
       return
@@ -211,9 +214,9 @@ export function render({ model, el }) {
         right_arrow_button.classList.remove("animated")
       }, 1500)
     }
-    window.dispatchEvent(new Event('resize'))
     split_div.style.visibility = ""
     split_div.classList.remove("loading")
+    sync_ui(is_collapsed == null ? sizes : (is_collapsed ? [100, 0] : [0, 100]), true)
   })
 
   model.on("remove", () => split_instance.destroy())

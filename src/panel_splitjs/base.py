@@ -13,7 +13,7 @@ IS_RELEASE = __version__ == base_version(__version__)
 BASE_PATH = Path(__file__).parent
 DIST_PATH = BASE_PATH / 'dist'
 CDN_BASE = f"https://cdn.holoviz.org/panel-splitjs/v{base_version(__version__)}"
-CDN_DIST = f"{CDN_BASE}/panel-material-ui.bundle.js"
+CDN_DIST = f"{CDN_BASE}/panel-splitjs.bundle.js"
 
 extension_dirs['panel-splitjs'] = DIST_PATH
 EXTENSION_CDN[DIST_PATH] = CDN_BASE
@@ -97,7 +97,7 @@ class Split(SplitBase):
     collapsed = param.Integer(default=None, doc="""
         Whether the first or second panel is collapsed. 0 for first panel, 1 for second panel, None for not collapsed.""")
 
-    expanded_sizes = param.NumericTuple(default=(50, 50), length=2, doc="""
+    expanded_sizes = Size(default=(50, 50), allow_None=True, length=2, doc="""
         The sizes of the two panels when expanded (as percentages).
         Default is (50, 50) .
         When invert=True, these percentages are automatically swapped.""")
@@ -116,7 +116,7 @@ class Split(SplitBase):
         Whether to show the toggle buttons on the divider.
         When False, the buttons are hidden and panels can only be resized by dragging.""")
 
-    sizes = param.NumericTuple(default=(50, 50), length=2, doc="""
+    sizes = Size(default=(50, 50), allow_None=True, length=2, doc="""
         The initial sizes of the two panels (as percentages).
         Default is (50, 50) which means the left panel takes up 50% of the space
         and the right panel is not visible.""")
