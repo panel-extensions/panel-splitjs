@@ -99,8 +99,8 @@ export function render({ model, el }) {
       initialized = true
       split_div.style.visibility = ""
       split_div.classList.remove("loading")
-      if (split) {
-        split.setSizes(sizes)
+      if (split && model.sizes) {
+        split.setSizes(model.sizes)
       }
     }
   })
