@@ -117,11 +117,11 @@ export function render({ model, el, view }) {
     })
     if (initialized) {
       for (const child_view of rerender_views) {
-	if (child_view?.rerender_) {
+        if (child_view?.rerender_) {
           child_view.rerender_()
-	} else if (child_view?.rerender) {
+        } else if (child_view?.rerender) {
           child_view.rerender()
-	}
+        }
       }
     }
   }
