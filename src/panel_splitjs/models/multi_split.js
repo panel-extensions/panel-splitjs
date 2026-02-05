@@ -1,6 +1,6 @@
 import Split from "https://esm.sh/split.js@1.6.5"
 
-export function render({ model, el }) {
+export function render({ model, el, view }) {
   const split_div = document.createElement("div")
   split_div.className = `split multi-split ${model.orientation}`
   split_div.style.visibility = "hidden"
@@ -8,6 +8,7 @@ export function render({ model, el }) {
 
   let split = null
   let initialized = false
+  let sizes = model.sizes
 
   function reconcileChildren(parent, desiredChildren) {
     // Ensure each desired child is at the correct index
@@ -34,29 +35,65 @@ export function render({ model, el }) {
       split = null
     }
 
+    const object_models = model.objects || []
     const objects = model.objects ? model.get_child("objects") : []
-    const split_items = []
+    const desired_ids = object_models.map((obj_model) => `split-panel-${obj_model.id}`)
+    const desired_id_set = new Set(desired_ids)
+    const current_children = Array.from(split_div.children)
+    const current_ids = current_children.map((child) => child.id)
+    const current_filtered = current_ids.filter((id) => desired_id_set.has(id))
+    const removals_only =
+      current_filtered.length === desired_ids.length &&
+      desired_ids.every((id, idx) => id === current_filtered[idx])
 
-    for (let i = 0; i < objects.length; i++) {
-      const obj = objects[i]
-      const id = `split-panel-${model.objects[i].id}`
+    const rerender_views = []
+    let split_items = []
 
-      // Try to reuse an existing split_item
-      let split_item = el.querySelector(`#${id}`)
-      if (split_item == null) {
-        split_item = document.createElement("div")
-        split_item.className = "split-panel"
-        split_item.id = id
-        split_item.replaceChildren(obj)
+    if (removals_only) {
+      for (const child of current_children) {
+        if (!desired_id_set.has(child.id)) {
+          child.remove()
+        }
+      }
+      split_items = desired_ids
+        .map((id) => split_div.querySelector(`#${id}`))
+        .filter((child) => child != null)
+    } else {
+      for (let i = 0; i < objects.length; i++) {
+        const obj_model = object_models[i]
+        const id = `split-panel-${obj_model.id}`
+        const current_child = current_children[i]
+
+        if (current_child?.id === id) {
+          split_items.push(current_child)
+          continue
+        }
+
+        const obj = objects[i]
+        const child_view = view.get_child_view(obj_model)
+        if (child_view?.rerender_ || child_view?.rerender) {
+          rerender_views.push(child_view)
+        }
+
+        // Try to reuse an existing split_item
+        let split_item = split_div.querySelector(`#${id}`)
+        if (split_item == null) {
+          split_item = document.createElement("div")
+          split_item.className = "split-panel"
+          split_item.id = id
+          split_item.replaceChildren(obj)
+        } else if (split_item.firstChild !== obj) {
+          split_item.replaceChildren(obj)
+        }
+
+        split_items.push(split_item)
       }
 
-      split_items.push(split_item)
+      // Incrementally reorder / trim children of split_div
+      reconcileChildren(split_div, split_items)
     }
 
-    // Incrementally reorder / trim children of split_div
-    reconcileChildren(split_div, split_items)
-
-    let sizes = model.sizes
+    sizes = model.sizes
     split = Split(split_items, {
       sizes,
       minSize: model.min_size || 0,
@@ -78,6 +115,13 @@ export function render({ model, el }) {
         this.model.sizes = sizes
       }
     })
+    for (const child_view of rerender_views) {
+      if (child_view?.rerender_) {
+        child_view.rerender_()
+      } else if (child_view?.rerender) {
+        child_view.rerender()
+      }
+    }
   }
 
   render_splits()
