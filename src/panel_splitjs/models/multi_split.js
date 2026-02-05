@@ -63,6 +63,7 @@ export function render({ model, el, view }) {
         const obj_model = object_models[i]
         const id = `split-panel-${obj_model.id}`
         const current_child = current_children[i]
+        let split_item = split_div.querySelector(`#${id}`)
 
         if (current_child?.id === id) {
           split_items.push(current_child)
@@ -71,12 +72,11 @@ export function render({ model, el, view }) {
 
         const obj = objects[i]
         const child_view = view.get_child_view(obj_model)
-        if (child_view?.rerender_ || child_view?.rerender) {
+        if (split_item && (child_view?.rerender_ || child_view?.rerender)) {
           rerender_views.push(child_view)
         }
 
         // Try to reuse an existing split_item
-        let split_item = split_div.querySelector(`#${id}`)
         if (split_item == null) {
           split_item = document.createElement("div")
           split_item.className = "split-panel"
@@ -115,11 +115,13 @@ export function render({ model, el, view }) {
         this.model.sizes = sizes
       }
     })
-    for (const child_view of rerender_views) {
-      if (child_view?.rerender_) {
-        child_view.rerender_()
-      } else if (child_view?.rerender) {
-        child_view.rerender()
+    if (initialized) {
+      for (const child_view of rerender_views) {
+	if (child_view?.rerender_) {
+          child_view.rerender_()
+	} else if (child_view?.rerender) {
+          child_view.rerender()
+	}
       }
     }
   }

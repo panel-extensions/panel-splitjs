@@ -1,14 +1,36 @@
 import pytest
+import param
 
 pytest.importorskip('playwright')
 
 from panel.tests.util import serve_component, wait_until
+from panel.custom import JSComponent
 from panel.pane import Markdown
 from panel.widgets import Button
 from panel_splitjs import MultiSplit, Split
 from playwright.sync_api import expect
 
 pytestmark = pytest.mark.ui
+
+
+class RenderCounter(JSComponent):
+    label = param.String()
+    render_count = param.Integer(default=0)
+
+    _esm = """
+    export function render({ model }) {
+      const div = document.createElement("div")
+      div.className = "render-counter"
+      const update = () => {
+        div.textContent = `${model.label}:${model.render_count}`
+      }
+      model.render_count = model.render_count + 1
+      update()
+      model.on('render_count', update)
+      model.on('label', update)
+      return div
+    }
+    """
 
 @pytest.mark.parametrize('orientation', ['horizontal', 'vertical'])
 def test_split(page, orientation):
@@ -236,3 +258,56 @@ def test_multi_split_append_panel(page):
     expect(page.locator(".markdown").nth(1)).to_have_text("MIDDLE")
     expect(page.locator(".markdown").nth(2)).to_have_text("RIGHT")
     expect(page.locator(".markdown").last).to_have_text("NEW")
+
+
+def test_multi_split_removal_keeps_render_counts(page):
+    left = RenderCounter(label="LEFT")
+    middle = RenderCounter(label="MIDDLE")
+    right = RenderCounter(label="RIGHT")
+    split = MultiSplit(left, middle, right)
+    serve_component(page, split)
+
+    wait_until(lambda: left.render_count == 1, page)
+    wait_until(lambda: middle.render_count == 1, page)
+    wait_until(lambda: right.render_count == 1, page)
+
+    split.pop(1)
+    wait_until(lambda: left.render_count == 1, page)
+    wait_until(lambda: right.render_count == 1, page)
+
+
+def test_multi_split_insert_middle_rerenders_moved(page):
+    left = RenderCounter(label="LEFT")
+    right = RenderCounter(label="RIGHT")
+    split = MultiSplit(left, right)
+    serve_component(page, split)
+
+    wait_until(lambda: left.render_count == 1, page)
+    wait_until(lambda: right.render_count == 1, page)
+
+    middle = RenderCounter(label="MIDDLE")
+    split.insert(1, middle)
+
+    wait_until(lambda: left.render_count == 1, page)
+    wait_until(lambda: middle.render_count == 1, page)
+    wait_until(lambda: right.render_count == 2, page)
+
+
+def test_multi_split_append_rerenders_new_only(page):
+    left = RenderCounter(label="LEFT")
+    middle = RenderCounter(label="MIDDLE")
+    right = RenderCounter(label="RIGHT")
+    split = MultiSplit(left, middle, right)
+    serve_component(page, split)
+
+    wait_until(lambda: left.render_count == 1, page)
+    wait_until(lambda: middle.render_count == 1, page)
+    wait_until(lambda: right.render_count == 1, page)
+
+    tail = RenderCounter(label="TAIL")
+    split.append(tail)
+
+    wait_until(lambda: left.render_count == 1, page)
+    wait_until(lambda: middle.render_count == 1, page)
+    wait_until(lambda: right.render_count == 1, page)
+    wait_until(lambda: tail.render_count == 1, page)
