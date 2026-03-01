@@ -169,7 +169,7 @@ jobs:
           echo "[run]\nconcurrency = greenlet" > .uicoveragerc
           pixi run -e ${{ matrix.environment }} test-ui $COV --cov-config=.uicoveragerc $FAIL
       - name: Upload UI Screenshots
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: ui_screenshots_${{ runner.os }}
