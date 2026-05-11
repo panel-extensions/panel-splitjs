@@ -276,6 +276,39 @@ def test_split_collapse_threshold_far_from_expanded(page, orientation):
 
 
 @pytest.mark.parametrize('orientation', ['horizontal', 'vertical'])
+def test_split_no_threshold_restores_when_above_expanded(page, orientation):
+    """With collapse_threshold=0, clicking button when sizes differ from expanded
+    (even above) should restore to expanded_sizes first."""
+    kwargs = {'width': 400} if orientation == 'horizontal' else {'height': 400}
+    split = Split(
+        Button(name='Left'), Button(name='Right'),
+        orientation=orientation,
+        sizes=(50, 50),
+        expanded_sizes=(40, 60),
+        collapse_threshold=0,
+        show_buttons=True,
+        **kwargs
+    )
+    serve_component(page, split)
+
+    attr = "width" if orientation == "horizontal" else "height"
+    btn1 = "left" if orientation == "horizontal" else "up"
+
+    # sizes=(50, 50) with expanded=(40, 60) and threshold=0.
+    # diff=10 >= 1, so not at expanded. First click should restore to (40, 60).
+    page.locator(f'.toggle-button-{btn1}').click()
+    expect(page.locator('.split-panel').first).to_have_attribute('style', f'{attr}: calc(40% - 4px);')
+    expect(page.locator('.split-panel').last).to_have_attribute('style', f'{attr}: calc(60% - 4px);')
+    wait_until(lambda: split.collapsed is None, page)
+
+    # Second click at expanded should now collapse.
+    page.locator(f'.toggle-button-{btn1}').click()
+    expect(page.locator('.split-panel').first).to_have_attribute('style', f'{attr}: calc(1% - 4px);')
+    expect(page.locator('.split-panel').last).to_have_attribute('style', f'{attr}: calc(99% - 4px);')
+    wait_until(lambda: split.collapsed == 0, page)
+
+
+@pytest.mark.parametrize('orientation', ['horizontal', 'vertical'])
 def test_split_button_restores_when_other_panel_collapsed(page, orientation):
     """When one panel is collapsed, clicking its collapse button should restore to expanded_sizes."""
     kwargs = {'width': 400} if orientation == 'horizontal' else {'height': 400}

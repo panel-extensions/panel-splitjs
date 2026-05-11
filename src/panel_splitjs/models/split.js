@@ -89,8 +89,10 @@ export function render({ model, el }) {
       let new_sizes
       const other_collapsed = model.sizes[1] <= COLLAPSED_SIZE
       const diff = Math.abs(model.sizes[0] - model.expanded_sizes[0])
-      const within_threshold = model.collapse_threshold > 0 && diff <= model.collapse_threshold
-      if (left_click_count === 1 && (other_collapsed || (model.sizes[0] < model.expanded_sizes[0] && !within_threshold))) {
+      const at_expanded = model.collapse_threshold > 0
+        ? diff <= model.collapse_threshold
+        : diff < 1
+      if (left_click_count === 1 && (other_collapsed || !at_expanded)) {
         new_sizes = model.expanded_sizes
         is_collapsed = null
       } else {
@@ -108,8 +110,10 @@ export function render({ model, el }) {
       let new_sizes
       const other_collapsed = model.sizes[0] <= COLLAPSED_SIZE
       const diff = Math.abs(model.sizes[1] - model.expanded_sizes[1])
-      const within_threshold = model.collapse_threshold > 0 && diff <= model.collapse_threshold
-      if (right_click_count === 1 && (other_collapsed || (model.sizes[1] < model.expanded_sizes[1] && !within_threshold))) {
+      const at_expanded = model.collapse_threshold > 0
+        ? diff <= model.collapse_threshold
+        : diff < 1
+      if (right_click_count === 1 && (other_collapsed || !at_expanded)) {
         new_sizes = model.expanded_sizes
         is_collapsed = null
       } else {
