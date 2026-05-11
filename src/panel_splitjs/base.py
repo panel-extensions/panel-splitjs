@@ -97,11 +97,11 @@ class Split(SplitBase):
     collapsed = param.Integer(default=None, doc="""
         Whether the first or second panel is collapsed. 0 for first panel, 1 for second panel, None for not collapsed.""")
 
-    collapse_threshold = param.Number(default=0, bounds=(0, None), doc="""
+    collapse_threshold = param.Number(default=5, bounds=(0, None), doc="""
         When set to a value > 0, clicking a collapse button will collapse the panel
         directly (instead of first snapping to expanded_sizes) when the panel's
         current size is within this many percentage points of its expanded size.
-        Default 0 disables the behavior and preserves the two-step
+        Setting to 0 disables the behavior and preserves the two-step
         expand-then-collapse interaction.""")
 
     expanded_sizes = Size(default=(50, 50), allow_None=True, length=2, doc="""
