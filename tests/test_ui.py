@@ -223,6 +223,99 @@ def test_multi_split_replace_panel(page):
     expect(page.locator(".markdown").nth(1)).to_have_text("MIDDLE")
     expect(page.locator(".markdown").last).to_have_text("RIGHT")
 
+@pytest.mark.parametrize('orientation', ['horizontal', 'vertical'])
+def test_split_collapse_threshold_near_expanded(page, orientation):
+    """When within collapse_threshold of expanded_sizes, a single click collapses directly."""
+    kwargs = {'width': 400} if orientation == 'horizontal' else {'height': 400}
+    split = Split(
+        Button(name='Left'), Button(name='Right'),
+        orientation=orientation,
+        sizes=(38, 62),
+        expanded_sizes=(40, 60),
+        collapse_threshold=5,
+        show_buttons=True,
+        **kwargs
+    )
+    serve_component(page, split)
+
+    attr = "width" if orientation == "horizontal" else "height"
+    btn1 = "left" if orientation == "horizontal" else "up"
+
+    # sizes=(38, 62): diff from expanded is 2, which is <= threshold 5.
+    # A single click on the left button should collapse directly (skip expand step).
+    page.locator(f'.toggle-button-{btn1}').click()
+    expect(page.locator('.split-panel').first).to_have_attribute('style', f'{attr}: calc(1% - 4px);')
+    expect(page.locator('.split-panel').last).to_have_attribute('style', f'{attr}: calc(99% - 4px);')
+    wait_until(lambda: split.collapsed == 0, page)
+
+
+@pytest.mark.parametrize('orientation', ['horizontal', 'vertical'])
+def test_split_collapse_threshold_far_from_expanded(page, orientation):
+    """When outside collapse_threshold, first click restores to expanded_sizes."""
+    kwargs = {'width': 400} if orientation == 'horizontal' else {'height': 400}
+    split = Split(
+        Button(name='Left'), Button(name='Right'),
+        orientation=orientation,
+        sizes=(25, 75),
+        expanded_sizes=(40, 60),
+        collapse_threshold=5,
+        show_buttons=True,
+        **kwargs
+    )
+    serve_component(page, split)
+
+    attr = "width" if orientation == "horizontal" else "height"
+    btn1 = "left" if orientation == "horizontal" else "up"
+
+    # sizes=(25, 75): diff from expanded is 15, which is > threshold 5.
+    # First click should restore to expanded_sizes (40, 60), not collapse.
+    page.locator(f'.toggle-button-{btn1}').click()
+    expect(page.locator('.split-panel').first).to_have_attribute('style', f'{attr}: calc(40% - 4px);')
+    expect(page.locator('.split-panel').last).to_have_attribute('style', f'{attr}: calc(60% - 4px);')
+    wait_until(lambda: split.collapsed is None, page)
+
+
+@pytest.mark.parametrize('orientation', ['horizontal', 'vertical'])
+def test_split_button_restores_when_other_panel_collapsed(page, orientation):
+    """When one panel is collapsed, clicking its collapse button should restore to expanded_sizes."""
+    kwargs = {'width': 400} if orientation == 'horizontal' else {'height': 400}
+    split = Split(
+        Button(name='Left'), Button(name='Right'),
+        orientation=orientation,
+        expanded_sizes=(40, 60),
+        show_buttons=True,
+        **kwargs
+    )
+    serve_component(page, split)
+
+    attr = "width" if orientation == "horizontal" else "height"
+    btn1 = "left" if orientation == "horizontal" else "up"
+    btn2 = "right" if orientation == "horizontal" else "down"
+
+    # Collapse the right panel via right button (two clicks: expand then collapse)
+    page.locator(f'.toggle-button-{btn2}').click()
+    page.locator(f'.toggle-button-{btn2}').click()
+    wait_until(lambda: split.collapsed == 1, page)
+
+    # Now left panel is ~100%, right is ~0%.
+    # Clicking left '<' should restore to expanded_sizes, NOT collapse the left panel.
+    page.locator(f'.toggle-button-{btn1}').click()
+    expect(page.locator('.split-panel').first).to_have_attribute('style', f'{attr}: calc(40% - 4px);')
+    expect(page.locator('.split-panel').last).to_have_attribute('style', f'{attr}: calc(60% - 4px);')
+    wait_until(lambda: split.collapsed is None, page)
+
+    # Now do the mirror: collapse left panel
+    page.locator(f'.toggle-button-{btn1}').click()
+    wait_until(lambda: split.collapsed == 0, page)
+
+    # Right panel is ~100%, left is ~0%.
+    # Clicking right '>' should restore to expanded_sizes, NOT collapse the right panel.
+    page.locator(f'.toggle-button-{btn2}').click()
+    expect(page.locator('.split-panel').first).to_have_attribute('style', f'{attr}: calc(40% - 4px);')
+    expect(page.locator('.split-panel').last).to_have_attribute('style', f'{attr}: calc(60% - 4px);')
+    wait_until(lambda: split.collapsed is None, page)
+
+
 def test_multi_split_append_panel(page):
     split = MultiSplit(Markdown("LEFT"), Markdown("MIDDLE"), Markdown("RIGHT"))
     serve_component(page, split)
