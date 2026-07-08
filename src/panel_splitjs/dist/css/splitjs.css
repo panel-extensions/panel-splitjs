@@ -60,7 +60,7 @@
 }
 
 .toggle-button-left {
-  left: -30px;
+  left: -28px;
   top: 50%;
   transform: translateY(-50%);
   -webkit-mask-image: url("arrow_left.svg");
@@ -74,14 +74,14 @@
   mask-image: url("arrow_right.svg");
 }
 .toggle-button-up {
-  top: -30px;
+  top: -20px;
   left: 50%;
   transform: translateX(-50%);
   -webkit-mask-image: url("arrow_up.svg");
   mask-image: url("arrow_up.svg");
 }
 .toggle-button-down {
-  top: 0;
+  top: 8px;
   left: 50%;
   transform: translateX(-50%);
   -webkit-mask-image: url("arrow_down.svg");
@@ -146,6 +146,7 @@
   -webkit-mask-image: url("handle_vertical.svg");
   mask-image: url("handle_vertical.svg");
   cursor: row-resize;
+  transform: translate(-50%, calc(-50% + 8px));
 }
 .gutter > .divider {
   --thickness: 1px;
@@ -161,10 +162,11 @@
   height: 100%;
   width: var(--thickness);
 }
-/* Horizontal line for a vertical (top/bottom) split */
+/* Horizontal line for a vertical (top/bottom) split. Nudged down to sit at the
+   visible panel boundary, matching the collapse arrows. */
 .gutter-vertical > .divider {
   top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(calc(-50% + 8px));
   width: 100%;
   height: var(--thickness);
 }
