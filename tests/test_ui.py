@@ -34,7 +34,7 @@ class RenderCounter(JSComponent):
 
 @pytest.mark.parametrize('orientation', ['horizontal', 'vertical'])
 def test_split(page, orientation):
-    split = Split(Button(name='Left'), Button(name='Right'), orientation=orientation)
+    split = Split(Button(label='Left'), Button(label='Right'), orientation=orientation)
     serve_component(page, split)
     expect(page.locator('.split-panel')).to_have_count(2)
     expect(page.locator('.content-wrapper')).to_have_count(2)
@@ -122,7 +122,7 @@ def test_split_min_size_one_side(page, orientation):
 
 
 def test_split_sizes(page):
-    split = Split(Button(name='Left'), Button(name='Right'), sizes=(40, 60), width=400)
+    split = Split(Button(label='Left'), Button(label='Right'), sizes=(40, 60), width=400)
     serve_component(page, split)
 
     expect(page.locator('.split-panel')).to_have_count(2)
@@ -133,7 +133,7 @@ def test_split_sizes(page):
 @pytest.mark.parametrize('orientation', ['horizontal', 'vertical'])
 def test_split_drag_gutter(page, orientation):
     kwargs = {'width': 400} if orientation == 'horizontal' else {'height': 400}
-    split = Split(Button(name='Left'), Button(name='Right'), orientation=orientation, **kwargs)
+    split = Split(Button(label='Left'), Button(label='Right'), orientation=orientation, **kwargs)
     serve_component(page, split)
 
     expect(page.locator('.gutter')).to_have_count(1)
@@ -153,7 +153,7 @@ def test_split_drag_gutter(page, orientation):
 
 
 def test_split_collapsed_programmatically(page):
-    split = Split(Button(name='Left'), Button(name='Right'), expanded_sizes=(40, 60), width=400)
+    split = Split(Button(label='Left'), Button(label='Right'), expanded_sizes=(40, 60), width=400)
     serve_component(page, split)
 
     split.collapsed = 0
@@ -176,7 +176,7 @@ def test_split_collapsed_programmatically(page):
 
 
 def test_split_sizes_programmatically(page):
-    split = Split(Button(name='Left'), Button(name='Right'), width=400)
+    split = Split(Button(label='Left'), Button(label='Right'), width=400)
     serve_component(page, split)
 
     split.sizes = (20, 80)
@@ -188,7 +188,7 @@ def test_split_sizes_programmatically(page):
 @pytest.mark.parametrize('orientation', ['horizontal', 'vertical'])
 def test_split_click_toggle_button(page, orientation):
     kwargs = {'width': 400} if orientation == 'horizontal' else {'height': 400}
-    split = Split(Button(name='Left'), Button(name='Right'), orientation=orientation, show_buttons=True, **kwargs)
+    split = Split(Button(label='Left'), Button(label='Right'), orientation=orientation, show_buttons=True, **kwargs)
     serve_component(page, split)
 
     btn1, btn2 = ("left", "right") if orientation == "horizontal" else ("up", "down")
@@ -218,7 +218,7 @@ def test_split_click_toggle_button(page, orientation):
 @pytest.mark.parametrize('orientation', ['horizontal', 'vertical'])
 def test_multi_split(page, orientation):
     kwargs = {'width': 400} if orientation == 'horizontal' else {'height': 400}
-    split = MultiSplit(Button(name='Left'), Button(name='Middle'), Button(name='Right'), orientation=orientation, **kwargs)
+    split = MultiSplit(Button(label='Left'), Button(label='Middle'), Button(label='Right'), orientation=orientation, **kwargs)
     serve_component(page, split)
     expect(page.locator('.split-panel')).to_have_count(3)
     expect(page.locator('.split')).to_have_class(f'split multi-split {orientation}')
@@ -250,7 +250,7 @@ def test_split_collapse_threshold_near_expanded(page, orientation):
     """When within collapse_threshold of expanded_sizes, a single click collapses directly."""
     kwargs = {'width': 400} if orientation == 'horizontal' else {'height': 400}
     split = Split(
-        Button(name='Left'), Button(name='Right'),
+        Button(label='Left'), Button(label='Right'),
         orientation=orientation,
         sizes=(38, 62),
         expanded_sizes=(40, 60),
@@ -276,7 +276,7 @@ def test_split_collapse_threshold_far_from_expanded(page, orientation):
     """When outside collapse_threshold, first click restores to expanded_sizes."""
     kwargs = {'width': 400} if orientation == 'horizontal' else {'height': 400}
     split = Split(
-        Button(name='Left'), Button(name='Right'),
+        Button(label='Left'), Button(label='Right'),
         orientation=orientation,
         sizes=(25, 75),
         expanded_sizes=(40, 60),
@@ -303,7 +303,7 @@ def test_split_no_threshold_restores_when_above_expanded(page, orientation):
     (even above) should restore to expanded_sizes first."""
     kwargs = {'width': 400} if orientation == 'horizontal' else {'height': 400}
     split = Split(
-        Button(name='Left'), Button(name='Right'),
+        Button(label='Left'), Button(label='Right'),
         orientation=orientation,
         sizes=(50, 50),
         expanded_sizes=(40, 60),
@@ -335,7 +335,7 @@ def test_split_button_restores_when_other_panel_collapsed(page, orientation):
     """When one panel is collapsed, clicking its collapse button should restore to expanded_sizes."""
     kwargs = {'width': 400} if orientation == 'horizontal' else {'height': 400}
     split = Split(
-        Button(name='Left'), Button(name='Right'),
+        Button(label='Left'), Button(label='Right'),
         orientation=orientation,
         expanded_sizes=(40, 60),
         show_buttons=True,
