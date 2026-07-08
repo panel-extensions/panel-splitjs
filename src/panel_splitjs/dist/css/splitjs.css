@@ -13,16 +13,8 @@
   flex-direction: column;
 }
 
-/* Padding for panel edges unless collapsed */
-.single-split.horizontal.expand-buttons > div:nth-child(1) { padding-right: 15px; }
-.single-split.horizontal > div:nth-child(1):has(.collapsed-content) { padding-right: 0; }
-.single-split.horizontal.expand-buttons > div:nth-child(3) { padding-left: 15px; }
-.single-split.horizontal > div:nth-child(3):has(.collapsed-content) { padding-left: 0; }
-
-.single-split.vertical.expand-buttons > div:nth-child(1) { padding-bottom: 15px; }
-.single-split.vertical > div:nth-child(1):has(.collapsed-content) { padding-bottom: 0; }
-.single-split.vertical.expand-buttons > div:nth-child(3) { padding-top: 15px; }
-.single-split.vertical > div:nth-child(3):has(.collapsed-content) { padding-top: 0; }
+/* The collapse/expand buttons overlay the panels rather than reserving gutter
+   padding for them, so an expandable divider adds no extra width. */
 
 /* Style for initial load to prevent FOUC */
 .loading {
@@ -46,15 +38,15 @@
 /* Toggle button base styles (deduplicated, combine base and arrow masks) */
 .toggle-button-left, .toggle-button-right, .toggle-button-up, .toggle-button-down {
   position: absolute;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 100; /* High z-index to ensure always on top */
-  opacity: 0.5;
-  transition: opacity 0.2s;
+  opacity: 0.4;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
   border-radius: 4px;
   padding: 2px;
 
@@ -63,8 +55,8 @@
   mask-repeat: no-repeat;
   -webkit-mask-position: center;
   mask-position: center;
-  -webkit-mask-size: 16px;
-  mask-size: 16px;
+  -webkit-mask-size: 14px;
+  mask-size: 14px;
 }
 
 .toggle-button-left {
@@ -75,21 +67,21 @@
   mask-image: url("arrow_left.svg");
 }
 .toggle-button-right {
-  left: -4px;
+  left: 0;
   top: 50%;
   transform: translateY(-50%);
   -webkit-mask-image: url("arrow_right.svg");
   mask-image: url("arrow_right.svg");
 }
 .toggle-button-up {
-  top: -28px;
+  top: -20px;
   left: 50%;
   transform: translateX(-50%);
   -webkit-mask-image: url("arrow_up.svg");
   mask-image: url("arrow_up.svg");
 }
 .toggle-button-down {
-  top: -4px;
+  top: 8px;
   left: 50%;
   transform: translateX(-50%);
   -webkit-mask-image: url("arrow_down.svg");
@@ -98,6 +90,7 @@
 
 .toggle-button-left:hover, .toggle-button-right:hover, .toggle-button-up:hover, .toggle-button-down:hover {
   opacity: 1;
+  background-color: var(--design-primary-color, var(--panel-primary-color));
 }
 
 /* Collapsed state */
@@ -107,13 +100,14 @@
 
 /* Gutter styles */
 .gutter {
-  background-color: var(--panel-background-color);
+  background-color: transparent;
   background-repeat: no-repeat;
   background-position: 50%;
   transition: background-color 0.2s;
   z-index: 999;
 }
-.gutter:hover {
+/* Subtle surface tint only while actively dragging, not on hover. */
+.gutter:active {
   background-color: var(--panel-surface-color);
 }
 .gutter.gutter-horizontal {
@@ -135,6 +129,11 @@
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   background-color: var(--panel-border-color);
+  transition: background-color 0.15s ease;
+}
+/* The grab handle brightens to the primary colour only while dragging. */
+.gutter:active::after {
+  background-color: var(--design-primary-color, var(--panel-primary-color));
 }
 .gutter.gutter-horizontal::after {
   width: 10px;
@@ -147,41 +146,35 @@
   -webkit-mask-image: url("handle_vertical.svg");
   mask-image: url("handle_vertical.svg");
   cursor: row-resize;
+  transform: translate(-50%, calc(-50% + 8px));
 }
 .gutter > .divider {
-  --gap: 40px;
   --thickness: 1px;
   --color: var(--panel-border-color);
   background: var(--color);
   position: absolute;
+  transition: background-color 0.15s ease, width 0.15s ease, height 0.15s ease;
 }
-/* Horizontal variant for divider */
-.gutter-vertical > .divider {
-  top: 50%;
-  width: 100%;
-  height: var(--thickness);
-  background:
-    linear-gradient(to right,
-      var(--color) 0,
-      var(--color) calc(50% - var(--gap) / 2),
-      transparent calc(50% - var(--gap) / 2),
-      transparent calc(50% + var(--gap) / 2),
-      var(--color) calc(50% + var(--gap) / 2),
-      var(--color) 100%);
-}
-/* Vertical variant for divider */
+/* Vertical line for a horizontal (left/right) split */
 .gutter-horizontal > .divider {
   left: 50%;
+  transform: translateX(-50%);
   height: 100%;
   width: var(--thickness);
-  background:
-    linear-gradient(to bottom,
-      var(--color) 0,
-      var(--color) calc(50% - var(--gap) / 2),
-      transparent calc(50% - var(--gap) / 2),
-      transparent calc(50% + var(--gap) / 2),
-      var(--color) calc(50% + var(--gap) / 2),
-      var(--color) 100%);
+}
+/* Horizontal line for a vertical (top/bottom) split. Nudged down to sit at the
+   visible panel boundary, matching the collapse arrows. */
+.gutter-vertical > .divider {
+  top: 50%;
+  transform: translateY(calc(-50% + 8px));
+  width: 100%;
+  height: var(--thickness);
+}
+/* Thicken and brighten to the primary colour only while actively dragging. */
+.gutter-horizontal:active > .divider { width: 2px; }
+.gutter-vertical:active > .divider { height: 2px; }
+.gutter:active > .divider {
+  background: var(--design-primary-color, var(--panel-primary-color));
 }
 
 /* Toggle button animation */
